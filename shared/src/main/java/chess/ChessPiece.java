@@ -68,7 +68,7 @@ public class ChessPiece {
         int newXPos;
         int newYPos;
 
-        if (piece.getPieceType() == PieceType.BISHOP) {
+        if (piece.getPieceType() == PieceType.BISHOP || piece.getPieceType() == PieceType.QUEEN) {
             for (i = 0; i < 4; i++) {
                 for (j = 1; j < 8; j++) {
                     newXPos = row + dirY * j;
@@ -94,10 +94,13 @@ public class ChessPiece {
                     dirY = dirY * -1;
                 }
             }
-            return validMovesArray;
+            if (piece.getPieceType() != PieceType.QUEEN) {
+                return validMovesArray;
+            }
+
         }
 
-        else if (piece.getPieceType() == PieceType.ROOK) {
+        if (piece.getPieceType() == PieceType.ROOK || piece.getPieceType() == PieceType.QUEEN) {
             dirX = 0;
             for (i = 0; i < 4; i++) {
                 for (j = 1; j < 8; j++) {
@@ -128,6 +131,7 @@ public class ChessPiece {
             }
             return validMovesArray;
         }
+
 
         return List.of();
     }
