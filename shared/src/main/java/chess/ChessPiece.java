@@ -63,16 +63,16 @@ public class ChessPiece {
         int col = myPosition.getColumn();
         int i;
         int j;
-        int dirX = 1;
         int dirY = 1;
+        int dirX = 1;
         int newXPos;
         int newYPos;
 
         if (piece.getPieceType() == PieceType.BISHOP || piece.getPieceType() == PieceType.QUEEN) {
             for (i = 0; i < 4; i++) {
                 for (j = 1; j < 8; j++) {
-                    newXPos = row + dirY * j;
-                    newYPos = col + dirX * j;
+                    newXPos = row + dirX * j;
+                    newYPos = col + dirY * j;
                     ChessPosition newChessPosition = new ChessPosition(newXPos, newYPos);
                     if (newXPos > 8 || newXPos < 1 || newYPos > 8 || newYPos < 1) {
                         break;
@@ -89,10 +89,10 @@ public class ChessPiece {
 
                 }
                 if (i % 2 == 0) {
-                    dirX = dirX * -1;
+                    dirY = dirY * -1;
                 }
                 else {
-                    dirY = dirY * -1;
+                    dirX = dirX * -1;
                 }
             }
             if (piece.getPieceType() != PieceType.QUEEN) {
@@ -102,11 +102,11 @@ public class ChessPiece {
         }
 
         if (piece.getPieceType() == PieceType.ROOK || piece.getPieceType() == PieceType.QUEEN) {
-            dirX = 0;
+            dirY = 0;
             for (i = 0; i < 4; i++) {
                 for (j = 1; j < 8; j++) {
-                    newXPos = row + dirY * j;
-                    newYPos = col + dirX * j;
+                    newXPos = row + dirX * j;
+                    newYPos = col + dirY * j;
                     ChessPosition newChessPosition = new ChessPosition(newXPos, newYPos);
                     if (newXPos > 8 || newXPos < 1 || newYPos > 8 || newYPos < 1) {
                         break;
@@ -122,32 +122,32 @@ public class ChessPiece {
                     validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
 
                 }
-                if (dirY > 0 || dirX > 0) {
-                    int temp = dirY * -1;
-                    dirY = dirX * -1;
-                    dirX = temp;
+                if (dirX > 0 || dirY > 0) {
+                    int temp = dirX * -1;
+                    dirX = dirY * -1;
+                    dirY = temp;
                 }
                 else {
-                    dirX = dirX * -1;
+                    dirY = dirY * -1;
                 }
             }
             return validMovesArray;
         }
 
         else if (piece.getPieceType() == PieceType.KNIGHT) {
-            dirX = 2;
-            dirY = 1;
+            dirY = 2;
+            dirX = 1;
             for (i = 0; i < 8; i++) {
                 if (i % 2 == 0) {
-                    int temp = dirX;
-                    dirX = dirY;
-                    dirY = temp;
+                    int temp = dirY;
+                    dirY = dirX;
+                    dirX = temp;
                 }
                 else {
-                    dirY = dirY * -1;
+                    dirX = dirX * -1;
                 }
-                newXPos = row + dirY;
-                newYPos = col + dirX;
+                newXPos = row + dirX;
+                newYPos = col + dirY;
                 ChessPosition newChessPosition = new ChessPosition(newXPos, newYPos);
                 if (newXPos > 8 || newXPos < 1 || newYPos > 8 || newYPos < 1) {
                     continue;
@@ -166,17 +166,17 @@ public class ChessPiece {
         }
 
         else if (piece.getPieceType() == PieceType.KING) {
-            dirY = 0;
-            dirX = 1;
+            dirX = 0;
+            dirY = 1;
             for (i = 0; i < 8; i++) {
                 if (i != 1 && i != 2 && i != 5 && i != 6) {
-                    dirY = dirY + dirX;
+                    dirX = dirX + dirY;
                 }
                 else {
-                    dirX = dirX - dirY;
+                    dirY = dirY - dirX;
                 }
-                newXPos = row + dirY;
-                newYPos = col + dirX;
+                newXPos = row + dirX;
+                newYPos = col + dirY;
                 ChessPosition newChessPosition = new ChessPosition(newXPos, newYPos);
                 if (newXPos > 8 || newXPos < 1 || newYPos > 8 || newYPos < 1) {
                     continue;
@@ -190,6 +190,64 @@ public class ChessPiece {
                     continue;
                 }
                 validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
+            }
+            return validMovesArray;
+        }
+
+        else if (piece.getPieceType() == PieceType.PAWN) {
+            boolean startState = false;
+            boolean isPromoting = false;
+            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                dirY = 1;
+                startState = (row == 2);
+                isPromoting = (row == 7); // About to step onto row 8
+            } else {
+                dirY = -1;
+                startState = (row == 7);
+                isPromoting = (row == 2); // About to step onto row 1
+            }
+            newXPos = row;
+            newYPos = col + dirY;
+
+            for (i = -1; i < 2; i = i + 2) {
+                newYPos = col + i;
+                newXPos = row + dirY;
+                if (newYPos > 8 || newYPos < 1) {
+                    continue;
+                }
+
+                ChessPosition newChessPosition = new ChessPosition(newXPos, newYPos);
+                ChessPiece pieceAtNewPos = board.getPiece(newChessPosition);
+                if (pieceAtNewPos != null) {
+                    if (isPromoting && pieceAtNewPos.pieceColor != piece.pieceColor) {
+                        validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), PieceType.QUEEN));
+                        validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), PieceType.KNIGHT));
+                        validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), PieceType.BISHOP));
+                        validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), PieceType.ROOK));
+                    }
+                    else if (pieceAtNewPos.pieceColor != piece.pieceColor) {
+                        validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
+                    }
+                }
+            }
+
+            ChessPosition newChessPosition = new ChessPosition(row + dirY, col);
+            ChessPiece pieceAtNewPos = board.getPiece(newChessPosition);
+            if (pieceAtNewPos == null && !isPromoting) {
+                validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(row + dirY, col), null));
+            }
+            if (isPromoting) {
+                validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(row + dirY, col), PieceType.QUEEN));
+                validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(row + dirY, col), PieceType.KNIGHT));
+                validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(row + dirY, col), PieceType.BISHOP));
+                validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(row + dirY, col), PieceType.ROOK));
+            }
+            if (startState) {
+                ChessPosition move2 = new ChessPosition(row + (dirY * 2), col);
+                ChessPiece pieceAtMove2 = board.getPiece(move2);
+                if (pieceAtMove2 == null && pieceAtNewPos == null) {
+                    validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(row + (dirY * 2), col), null));
+                }
             }
             return validMovesArray;
         }
