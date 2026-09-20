@@ -67,6 +67,7 @@ public class ChessPiece {
         int dirY = 1;
         int newXPos;
         int newYPos;
+
         if (piece.getPieceType() == PieceType.BISHOP) {
             for (i = 0; i < 4; i++) {
                 for (j = 1; j < 8; j++) {
@@ -95,6 +96,39 @@ public class ChessPiece {
             }
             return validMovesArray;
         }
+
+        else if (piece.getPieceType() == PieceType.ROOK) {
+            dirX = 0;
+            for (i = 0; i < 4; i++) {
+                for (j = 1; j < 8; j++) {
+                    newXPos = row + dirY * j;
+                    newYPos = col + dirX * j;
+                    ChessPosition newChessPosition = new ChessPosition(newXPos, newYPos);
+                    if (newXPos > 8 || newXPos < 1 || newYPos > 8 || newYPos < 1) {
+                        break;
+                    }
+                    ChessPiece pieceAtNewPos = board.getPiece(newChessPosition);
+                    if (pieceAtNewPos != null) {
+                        if (pieceAtNewPos.pieceColor != piece.pieceColor) {
+                            validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
+                        }
+                        break;
+                    }
+                    validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
+
+                }
+                if (dirY > 0 || dirX > 0) {
+                    int temp = dirY * -1;
+                    dirY = dirX * -1;
+                    dirX = temp;
+                }
+                else {
+                    dirX = dirX * -1;
+                }
+            }
+            return validMovesArray;
+        }
+
         return List.of();
     }
 
