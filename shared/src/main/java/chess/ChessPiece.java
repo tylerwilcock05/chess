@@ -165,6 +165,35 @@ public class ChessPiece {
             return validMovesArray;
         }
 
+        else if (piece.getPieceType() == PieceType.KING) {
+            dirY = 0;
+            dirX = 1;
+            for (i = 0; i < 8; i++) {
+                if (i != 1 && i != 2 && i != 5 && i != 6) {
+                    dirY = dirY + dirX;
+                }
+                else {
+                    dirX = dirX - dirY;
+                }
+                newXPos = row + dirY;
+                newYPos = col + dirX;
+                ChessPosition newChessPosition = new ChessPosition(newXPos, newYPos);
+                if (newXPos > 8 || newXPos < 1 || newYPos > 8 || newYPos < 1) {
+                    continue;
+                }
+                ChessPiece pieceAtNewPos = board.getPiece(newChessPosition);
+                // Checks if there's a piece where the new position is. If so, it replaces a piece if it has opposite color or if it's the same color, it doesn't add move to list of valid moves
+                if (pieceAtNewPos != null) {
+                    if (pieceAtNewPos.pieceColor != piece.pieceColor) {
+                        validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
+                    }
+                    continue;
+                }
+                validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
+            }
+            return validMovesArray;
+        }
+
         return List.of();
     }
 
