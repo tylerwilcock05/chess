@@ -76,10 +76,15 @@ public class ChessPiece {
                     if (newXPos > 8 || newXPos < 1 || newYPos > 8 || newYPos < 1) {
                         break;
                     }
-                    validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
-                    if (board.getPiece(newChessPosition) != null) {
+                    ChessPiece pieceAtNewPos = board.getPiece(newChessPosition);
+                    if (pieceAtNewPos != null) {
+                        if (pieceAtNewPos.pieceColor != piece.pieceColor) {
+                            validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
+                        }
                         break;
                     }
+                    validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
+
                 }
                 if (i % 2 == 0) {
                     dirX = dirX * -1;
