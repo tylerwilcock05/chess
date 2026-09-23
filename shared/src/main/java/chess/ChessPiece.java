@@ -47,6 +47,42 @@ public class ChessPiece {
         return type;
     }
 
+    private boolean isInBounds(int row, int col) {
+        if (row < 1 || row > 8 || col < 1 || col > 8) {
+            return false;
+        }
+        return true;
+    }
+
+    private Collection<ChessMove> getSliderValidMoves(ChessBoard board, ChessPosition myPosition, int[][] directions) {
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        int newRow;
+        int newCol;
+        Collection<ChessMove> validMoves = new ArrayList<>(27);
+        ChessPiece ogPiece = board.getPiece(myPosition);
+        ChessGame.TeamColor ogColor = ogPiece.pieceColor;
+
+        for (int[] dir : directions) {
+            for (int i= 1; i < 8; i++) {
+                newRow = row + dir[0] * i;
+                newCol = col + dir[1] * i;
+                if (isInBounds(newRow, newCol)) {
+                    ChessPiece newPiece = board.getPiece(new ChessPosition(newRow, newCol));
+                    if (newPiece == null || newPiece.pieceColor != ogColor) {
+                        validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), null));
+                    }
+                    if (newPiece != null) {
+                        break;
+                    }
+                }
+            }
+
+        }
+        return validMoves;
+
+    }
+
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -55,201 +91,124 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-
-        ChessPiece piece = board.getPiece(myPosition);
-        Collection<ChessMove> validMovesArray = new ArrayList<>(27);
-        int validMoves = 0;
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
-        int i;
-        int j;
-        int dirY = 1;
-        int dirX = 1;
-        int newXPos;
-        int newYPos;
+        int newRow;
+        int newCol;
+        Collection<ChessMove> validMoves = new ArrayList<>(27);
+        ChessPiece ogPiece = board.getPiece(myPosition);
+        ChessGame.TeamColor ogColor = ogPiece.pieceColor;
 
-        if (piece.getPieceType() == PieceType.BISHOP || piece.getPieceType() == PieceType.QUEEN) {
-            for (i = 0; i < 4; i++) {
-                for (j = 1; j < 8; j++) {
-                    newXPos = row + dirX * j;
-                    newYPos = col + dirY * j;
-                    ChessPosition newChessPosition = new ChessPosition(newXPos, newYPos);
-                    if (newXPos > 8 || newXPos < 1 || newYPos > 8 || newYPos < 1) {
-                        break;
+        if (ogPiece.getPieceType() == PieceType.KNIGHT) {
+            int[][] indexes = {{1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1}};
+            for (int[] index : indexes) {
+                newRow = row + index[0];
+                newCol = col + index[1];
+                if (isInBounds(newRow, newCol)) {
+                    ChessPiece newPiece = board.getPiece(new ChessPosition(newRow, newCol));
+                    if (newPiece == null || newPiece.pieceColor != ogColor) {
+                        validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), null));
                     }
-                    ChessPiece pieceAtNewPos = board.getPiece(newChessPosition);
-                    // Checks if there's a piece where the new position is. If so, it replaces a piece if it has opposite color or if it's the same color, it doesn't add move to list of valid moves
-                    if (pieceAtNewPos != null) {
-                        if (pieceAtNewPos.pieceColor != piece.pieceColor) {
-                            validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
+                }
+            }
+            return validMoves;
+        }
+
+        if (ogPiece.getPieceType() == PieceType.BISHOP) {
+            int[][] directions = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+            return getSliderValidMoves(board, myPosition, directions);
+        }
+
+        if (ogPiece.getPieceType() == PieceType.ROOK) {
+            int[][] directions = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
+            return getSliderValidMoves(board, myPosition, directions);
+        }
+
+        if (ogPiece.getPieceType() == PieceType.QUEEN) {
+            int[][] directions = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}, {0, 1}, {0, -1}, {-1, 0}, {1, 0}};
+            return getSliderValidMoves(board, myPosition, directions);
+        }
+
+        if (ogPiece.getPieceType() == PieceType.KING) {
+            int[][] indexes = {{-1, 1}, {0, 1}, {1, 1}, {-1, 0}, {1, 0}, {-1, -1}, {0, -1}, {1, -1}};
+            for (int[] index : indexes) {
+                newRow = row + index[0];
+                newCol = col + index[1];
+                if (isInBounds(newRow, newCol)) {
+                    ChessPiece newPiece = board.getPiece(new ChessPosition(newRow, newCol));
+                    if (newPiece == null || newPiece.pieceColor != ogColor) {
+                        validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), null));
+                    }
+                }
+            }
+            return validMoves;
+        }
+
+        if (ogPiece.getPieceType() == PieceType.PAWN) {
+            int startRow;
+            int promotionRow;
+            int dir;
+            if (ogPiece.pieceColor == ChessGame.TeamColor.WHITE) {
+                startRow = 2;
+                promotionRow = 8;
+                dir = 1;
+            }
+            else {
+                startRow = 7;
+                promotionRow = 1;
+                dir = -1;
+            }
+            newRow = row + dir;
+            newCol = col;
+
+            // check up one
+            if (isInBounds(newRow, newCol)) {
+                ChessPiece newPiece = board.getPiece(new ChessPosition(newRow, newCol));
+                if (newPiece == null) {
+                    if (newRow == promotionRow) {
+                        validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.QUEEN));
+                        validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.KNIGHT));
+                        validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.BISHOP));
+                        validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.ROOK));
+                    }
+                    else {
+                        validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), null));
+                    }
+
+                    // check up two
+                    int up2Row = row + dir * 2;
+                    if (isInBounds(up2Row, newCol) && row == startRow) {
+                        ChessPiece up2Piece = board.getPiece(new ChessPosition(up2Row, newCol));
+                        if (up2Piece == null)
+                        {
+                            validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(up2Row, newCol), null));
                         }
-                        break;
                     }
-                    validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
-
-                }
-                if (i % 2 == 0) {
-                    dirY = dirY * -1;
-                }
-                else {
-                    dirX = dirX * -1;
                 }
             }
-            if (piece.getPieceType() != PieceType.QUEEN) {
-                return validMovesArray;
-            }
 
-        }
-
-        if (piece.getPieceType() == PieceType.ROOK || piece.getPieceType() == PieceType.QUEEN) {
-            dirY = 0;
-            for (i = 0; i < 4; i++) {
-                for (j = 1; j < 8; j++) {
-                    newXPos = row + dirX * j;
-                    newYPos = col + dirY * j;
-                    ChessPosition newChessPosition = new ChessPosition(newXPos, newYPos);
-                    if (newXPos > 8 || newXPos < 1 || newYPos > 8 || newYPos < 1) {
-                        break;
-                    }
-                    ChessPiece pieceAtNewPos = board.getPiece(newChessPosition);
-                    // Checks if there's a piece where the new position is. If so, it replaces a piece if it has opposite color or if it's the same color, it doesn't add move to list of valid moves
-                    if (pieceAtNewPos != null) {
-                        if (pieceAtNewPos.pieceColor != piece.pieceColor) {
-                            validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
+            // check captures
+            for (int i = -1; i < 2; i = i + 2) {
+                newRow = row + dir;
+                newCol = col + i;
+                if (isInBounds(newRow, newCol)) {
+                    ChessPiece newPiece = board.getPiece(new ChessPosition(newRow, newCol));
+                    if (newPiece != null && newPiece.pieceColor != ogColor) {
+                        if (newRow == promotionRow) {
+                            validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.QUEEN));
+                            validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.KNIGHT));
+                            validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.BISHOP));
+                            validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.ROOK));
                         }
-                        break;
-                    }
-                    validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
+                        else {
+                            validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), null));
+                        }
 
-                }
-                if (dirX > 0 || dirY > 0) {
-                    int temp = dirX * -1;
-                    dirX = dirY * -1;
-                    dirY = temp;
-                }
-                else {
-                    dirY = dirY * -1;
-                }
-            }
-            return validMovesArray;
-        }
-
-        else if (piece.getPieceType() == PieceType.KNIGHT) {
-            dirY = 2;
-            dirX = 1;
-            for (i = 0; i < 8; i++) {
-                if (i % 2 == 0) {
-                    int temp = dirY;
-                    dirY = dirX;
-                    dirX = temp;
-                }
-                else {
-                    dirX = dirX * -1;
-                }
-                newXPos = row + dirX;
-                newYPos = col + dirY;
-                ChessPosition newChessPosition = new ChessPosition(newXPos, newYPos);
-                if (newXPos > 8 || newXPos < 1 || newYPos > 8 || newYPos < 1) {
-                    continue;
-                }
-                ChessPiece pieceAtNewPos = board.getPiece(newChessPosition);
-                // Checks if there's a piece where the new position is. If so, it replaces a piece if it has opposite color or if it's the same color, it doesn't add move to list of valid moves
-                if (pieceAtNewPos != null) {
-                    if (pieceAtNewPos.pieceColor != piece.pieceColor) {
-                        validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
-                    }
-                    continue;
-                }
-                validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
-            }
-            return validMovesArray;
-        }
-
-        else if (piece.getPieceType() == PieceType.KING) {
-            dirX = 0;
-            dirY = 1;
-            for (i = 0; i < 8; i++) {
-                if (i != 1 && i != 2 && i != 5 && i != 6) {
-                    dirX = dirX + dirY;
-                }
-                else {
-                    dirY = dirY - dirX;
-                }
-                newXPos = row + dirX;
-                newYPos = col + dirY;
-                ChessPosition newChessPosition = new ChessPosition(newXPos, newYPos);
-                if (newXPos > 8 || newXPos < 1 || newYPos > 8 || newYPos < 1) {
-                    continue;
-                }
-                ChessPiece pieceAtNewPos = board.getPiece(newChessPosition);
-                // Checks if there's a piece where the new position is. If so, it replaces a piece if it has opposite color or if it's the same color, it doesn't add move to list of valid moves
-                if (pieceAtNewPos != null) {
-                    if (pieceAtNewPos.pieceColor != piece.pieceColor) {
-                        validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
-                    }
-                    continue;
-                }
-                validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
-            }
-            return validMovesArray;
-        }
-
-        else if (piece.getPieceType() == PieceType.PAWN) {
-            boolean startState = false;
-            boolean isPromoting = false;
-            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                dirY = 1;
-                startState = (row == 2);
-                isPromoting = (row == 7); // About to step onto row 8
-            } else {
-                dirY = -1;
-                startState = (row == 7);
-                isPromoting = (row == 2); // About to step onto row 1
-            }
-            newXPos = row;
-            newYPos = col + dirY;
-
-            for (i = -1; i < 2; i = i + 2) {
-                newYPos = col + i;
-                newXPos = row + dirY;
-                if (newYPos > 8 || newYPos < 1) {
-                    continue;
-                }
-
-                ChessPosition newChessPosition = new ChessPosition(newXPos, newYPos);
-                ChessPiece pieceAtNewPos = board.getPiece(newChessPosition);
-                if (pieceAtNewPos != null) {
-                    if (isPromoting && pieceAtNewPos.pieceColor != piece.pieceColor) {
-                        validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), PieceType.QUEEN));
-                        validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), PieceType.KNIGHT));
-                        validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), PieceType.BISHOP));
-                        validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), PieceType.ROOK));
-                    }
-                    else if (pieceAtNewPos.pieceColor != piece.pieceColor) {
-                        validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newXPos, newYPos), null));
                     }
                 }
             }
 
-            ChessPosition newChessPosition = new ChessPosition(row + dirY, col);
-            ChessPiece pieceAtNewPos = board.getPiece(newChessPosition);
-            if (pieceAtNewPos == null && !isPromoting) {
-                validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(row + dirY, col), null));
-            }
-            if (isPromoting) {
-                validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(row + dirY, col), PieceType.QUEEN));
-                validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(row + dirY, col), PieceType.KNIGHT));
-                validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(row + dirY, col), PieceType.BISHOP));
-                validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(row + dirY, col), PieceType.ROOK));
-            }
-            if (startState) {
-                ChessPosition move2 = new ChessPosition(row + (dirY * 2), col);
-                ChessPiece pieceAtMove2 = board.getPiece(move2);
-                if (pieceAtMove2 == null && pieceAtNewPos == null) {
-                    validMovesArray.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(row + (dirY * 2), col), null));
-                }
-            }
-            return validMovesArray;
+            return validMoves;
         }
 
         return List.of();
@@ -257,10 +216,7 @@ public class ChessPiece {
 
     @Override
     public String toString() {
-        return "ChessPiece{" +
-                "pieceColor=" + pieceColor +
-                ", type=" + type +
-                '}';
+        return String.format("%s %s", pieceColor, type);
     }
 
     @Override
