@@ -54,7 +54,7 @@ public class ChessPiece {
         return true;
     }
 
-    private Collection<ChessMove> getSliderValidMoves(ChessBoard board, ChessPosition myPosition, int[][] directions) {
+    public Collection<ChessMove> getSliderValidMoves(ChessBoard board, ChessPosition myPosition, int[][] directions, boolean limited) {
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         int newRow;
@@ -62,9 +62,14 @@ public class ChessPiece {
         Collection<ChessMove> validMoves = new ArrayList<>(27);
         ChessPiece ogPiece = board.getPiece(myPosition);
         ChessGame.TeamColor ogColor = ogPiece.pieceColor;
+        int max = 8;
+        if (limited) {
+            max = 2;
+        }
+
 
         for (int[] dir : directions) {
-            for (int i= 1; i < 8; i++) {
+            for (int i= 1; i < max; i++) {
                 newRow = row + dir[0] * i;
                 newCol = col + dir[1] * i;
                 if (isInBounds(newRow, newCol)) {
@@ -101,47 +106,27 @@ public class ChessPiece {
 
         if (ogPiece.getPieceType() == PieceType.KNIGHT) {
             int[][] indexes = {{1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1}};
-            for (int[] index : indexes) {
-                newRow = row + index[0];
-                newCol = col + index[1];
-                if (isInBounds(newRow, newCol)) {
-                    ChessPiece newPiece = board.getPiece(new ChessPosition(newRow, newCol));
-                    if (newPiece == null || newPiece.pieceColor != ogColor) {
-                        validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), null));
-                    }
-                }
-            }
-            return validMoves;
+            return getSliderValidMoves(board, myPosition, indexes, true);
         }
 
         if (ogPiece.getPieceType() == PieceType.BISHOP) {
             int[][] directions = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
-            return getSliderValidMoves(board, myPosition, directions);
+            return getSliderValidMoves(board, myPosition, directions, false);
         }
 
         if (ogPiece.getPieceType() == PieceType.ROOK) {
             int[][] directions = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
-            return getSliderValidMoves(board, myPosition, directions);
+            return getSliderValidMoves(board, myPosition, directions, false);
         }
 
         if (ogPiece.getPieceType() == PieceType.QUEEN) {
             int[][] directions = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}, {0, 1}, {0, -1}, {-1, 0}, {1, 0}};
-            return getSliderValidMoves(board, myPosition, directions);
+            return getSliderValidMoves(board, myPosition, directions, false);
         }
 
         if (ogPiece.getPieceType() == PieceType.KING) {
             int[][] indexes = {{-1, 1}, {0, 1}, {1, 1}, {-1, 0}, {1, 0}, {-1, -1}, {0, -1}, {1, -1}};
-            for (int[] index : indexes) {
-                newRow = row + index[0];
-                newCol = col + index[1];
-                if (isInBounds(newRow, newCol)) {
-                    ChessPiece newPiece = board.getPiece(new ChessPosition(newRow, newCol));
-                    if (newPiece == null || newPiece.pieceColor != ogColor) {
-                        validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), null));
-                    }
-                }
-            }
-            return validMoves;
+            return getSliderValidMoves(board, myPosition, indexes, true);
         }
 
         if (ogPiece.getPieceType() == PieceType.PAWN) {
