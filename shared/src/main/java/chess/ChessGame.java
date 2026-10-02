@@ -16,14 +16,12 @@ public class ChessGame {
 
     private ChessBoard Board = new ChessBoard();
     private TeamColor turn;
-    private int[] whiteKingPos;
-    private int[] blackKingPos;
+
 
     public ChessGame() {
         turn = TeamColor.WHITE;
         Board.resetBoard();
-        whiteKingPos = new int[]{1, 5};
-        blackKingPos = new int[]{8, 5};
+
     }
 
     /**
@@ -96,11 +94,17 @@ public class ChessGame {
                 if (isInBounds(newRow, newCol)) {
                     ChessPiece newPiece = Board.getPiece(new ChessPosition(newRow, newCol));
                     if (newPiece != null) {
-                        if (Arrays.asList(enemyTypes).contains(newPiece.getPieceType()) && newPiece.getTeamColor() != color) {
-                            return true;
+                        for (ChessPiece.PieceType type : enemyTypes) {
+                            if (type == newPiece.getPieceType() && newPiece.getTeamColor() != color) {
+                                return true;
+                            }
                         }
+
                         break;
                     }
+                }
+                else {
+                    break;
                 }
             }
         }
@@ -121,13 +125,13 @@ public class ChessGame {
         int[][] knight_indexes = {{1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1}};
         int[][] pawn_indexes;
         if (teamColor == TeamColor.WHITE) {
-            kingRow = whiteKingPos[0];
-            kingCol = whiteKingPos[1];
+            kingRow = Board.getWhiteKingPos()[0];
+            kingCol = Board.getWhiteKingPos()[1];
             pawn_indexes = new int[][]{{1, 1}, {1, -1}};
         }
         else {
-            kingRow = blackKingPos[0];
-            kingCol = blackKingPos[1];
+            kingRow = Board.getBlackKingPos()[0];
+            kingCol = Board.getBlackKingPos()[1];
             pawn_indexes = new int[][]{{-1, 1}, {-1, -1}};
         }
         if (isAttackedByPieces(kingRow, kingCol, diagonal_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.BISHOP}, teamColor, true)) {

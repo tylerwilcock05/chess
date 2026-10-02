@@ -12,9 +12,28 @@ import java.util.Objects;
 public class ChessBoard {
 
     private ChessPiece[][] board = new ChessPiece[8][8];
+    private int[] whiteKingPos;
+    private int[] blackKingPos;
 
     public ChessBoard() {
+        whiteKingPos = new int[]{1, 5};
+        blackKingPos = new int[]{8, 5};
+    }
 
+    public int[] getWhiteKingPos() {
+        return whiteKingPos;
+    }
+
+    public int[] getBlackKingPos() {
+        return blackKingPos;
+    }
+
+    void setWhiteKingPos(int row, int col) {
+        whiteKingPos = new int[]{row, col};
+    }
+
+    void setBlackKingPos(int row, int col) {
+        blackKingPos = new int[]{row, col};
     }
 
     /**
@@ -25,6 +44,14 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         board[position.getRow()-1][position.getColumn()-1] = piece;
+        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                setWhiteKingPos(position.getRow(), position.getColumn());
+            }
+            else {
+                setBlackKingPos(position.getRow(), position.getColumn());
+            }
+        }
     }
 
     /**
