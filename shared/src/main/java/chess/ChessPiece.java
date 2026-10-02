@@ -47,14 +47,14 @@ public class ChessPiece {
         return type;
     }
 
-    private boolean isInBounds(int row, int col) {
+    public static boolean isInBounds(int row, int col) {
         if (row < 1 || row > 8 || col < 1 || col > 8) {
             return false;
         }
         return true;
     }
 
-    public Collection<ChessMove> getSliderValidMoves(ChessBoard board, ChessPosition myPosition, int[][] directions, boolean limited) {
+    public Collection<ChessMove> getSliderValidMoves(ChessBoard board, ChessPosition myPosition, int[][] directions, boolean onlyOneHop) {
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         int newRow;
@@ -63,11 +63,9 @@ public class ChessPiece {
         ChessPiece ogPiece = board.getPiece(myPosition);
         ChessGame.TeamColor ogColor = ogPiece.pieceColor;
         int max = 8;
-        if (limited) {
+        if (onlyOneHop) {
             max = 2;
         }
-
-
         for (int[] dir : directions) {
             for (int i= 1; i < max; i++) {
                 newRow = row + dir[0] * i;
@@ -82,10 +80,8 @@ public class ChessPiece {
                     }
                 }
             }
-
         }
         return validMoves;
-
     }
 
     /**

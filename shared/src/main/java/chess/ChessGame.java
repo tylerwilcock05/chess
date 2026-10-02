@@ -1,6 +1,10 @@
 package chess;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+
+import static chess.ChessPiece.isInBounds;
 
 /**
  * A class that can manage a chess game, making moves on a board
@@ -12,10 +16,14 @@ public class ChessGame {
 
     private ChessBoard Board = new ChessBoard();
     private TeamColor turn;
+    private int[] whiteKingPos;
+    private int[] blackKingPos;
 
     public ChessGame() {
         turn = TeamColor.WHITE;
         Board.resetBoard();
+        whiteKingPos = new int[]{1, 5};
+        blackKingPos = new int[]{8, 5};
     }
 
     /**
@@ -50,7 +58,18 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = Board.getPiece(startPosition);
+        if (piece == null) {
+            return null;
+        }
+        Collection<ChessMove> validMoves = piece.pieceMoves(Board, startPosition);
+        for (ChessMove move : validMoves) {
+            if (isInCheck(turn)) {
+                validMoves.remove(move);
+            }
+        }
+
+        return validMoves;
     }
 
     /**
@@ -63,6 +82,31 @@ public class ChessGame {
 
     }
 
+    private boolean isAttackedByPieces(int kingRow, int kingCol, int[][] directions, ChessPiece.PieceType[] enemyTypes, TeamColor color, boolean isSlider) {
+        int newRow;
+        int newCol;
+        int max = 2;
+        if (isSlider) {
+            max = 8;
+        }
+        for (int[] dir : directions) {
+            for (int i= 1; i < max; i++) {
+                newRow = kingRow + dir[0] * i;
+                newCol = kingCol + dir[1] * i;
+                if (isInBounds(newRow, newCol)) {
+                    ChessPiece newPiece = Board.getPiece(new ChessPosition(newRow, newCol));
+                    if (newPiece != null) {
+                        if (Arrays.asList(enemyTypes).contains(newPiece.getPieceType()) && newPiece.getTeamColor() != color) {
+                            return true;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Determines if the given team is in check
      *
@@ -70,7 +114,35 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        int kingRow;
+        int kingCol;
+        int[][] diagonal_indexes = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+        int[][] vertical_indexes = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
+        int[][] knight_indexes = {{1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1}};
+        int[][] pawn_indexes;
+        if (teamColor == TeamColor.WHITE) {
+            kingRow = whiteKingPos[0];
+            kingCol = whiteKingPos[1];
+            pawn_indexes = new int[][]{{1, 1}, {1, -1}};
+        }
+        else {
+            kingRow = blackKingPos[0];
+            kingCol = blackKingPos[1];
+            pawn_indexes = new int[][]{{-1, 1}, {-1, -1}};
+        }
+        if (isAttackedByPieces(kingRow, kingCol, diagonal_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.BISHOP}, teamColor, true)) {
+            return true;
+        }
+        if (isAttackedByPieces(kingRow, kingCol, vertical_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.ROOK}, teamColor, true)) {
+            return true;
+        }
+        if (isAttackedByPieces(kingRow, kingCol, knight_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.KNIGHT}, teamColor, false)) {
+            return true;
+        }
+        if (isAttackedByPieces(kingRow, kingCol, pawn_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.PAWN}, teamColor, false)) {
+            return true;
+        }
+        return false;
     }
 
     /**
