@@ -3,6 +3,7 @@ package chess;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
 import static chess.ChessPiece.isInBounds;
 
@@ -304,5 +305,27 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return Board;
+    }
+
+    @Override
+    public String toString() {
+        return "ChessGame{" +
+                "Board=" + Board +
+                ", turn=" + turn +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.equals(Board, chessGame.Board) && turn == chessGame.turn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Board, turn);
     }
 }
