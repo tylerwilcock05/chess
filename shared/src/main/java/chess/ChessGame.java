@@ -61,7 +61,9 @@ public class ChessGame {
             return null;
         }
         Collection<ChessMove> validMoves = piece.pieceMoves(Board, startPosition);
-        validMoves.removeIf(move -> !isInCheckPos(turn, move.getEndPosition().getRow(), move.getEndPosition().getColumn(), true).isEmpty());
+        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+            validMoves.removeIf(move -> !isInCheckPos(turn, move.getEndPosition().getRow(), move.getEndPosition().getColumn(), true).isEmpty());
+        }
 
         return validMoves;
     }
@@ -73,6 +75,18 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        ChessPosition startPos = move.getStartPosition();
+        ChessPosition endPos = move.getEndPosition();
+        ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
+        ChessPiece newPiece = Board.getPiece(new ChessPosition(startPos.getRow(), startPos.getColumn()));
+        Collection<ChessMove> validMoves = validMoves(startPos);
+        if (validMoves == null || !validMoves.contains(move)) {
+            throw new InvalidMoveException("Invalid move: " + move);
+        }
+        else {
+            Board.addPiece(endPos, newPiece);
+            Board.removePiece(startPos);
+        }
 
     }
 
