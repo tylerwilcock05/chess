@@ -235,7 +235,20 @@ public class ChessGame {
             kingCol = Board.getBlackKingPos()[1];
         }
         // need to check if all pieces have no moves, not just the king
-        return !isInCheck(teamColor) && validMoves(new ChessPosition(kingRow, kingCol)).isEmpty();
+        if (!isInCheck(teamColor) && validMoves(new ChessPosition(kingRow, kingCol)).isEmpty()) {
+            for (int i = 1; i < 9; i++) {
+                for (int j = 1; j < 9; j++) {
+                    ChessPiece newPiece = Board.getPiece(new ChessPosition(i, j));
+                    if (newPiece != null && newPiece.getTeamColor() == teamColor) {
+                        if (!validMoves(new ChessPosition(i, j)).isEmpty()) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
