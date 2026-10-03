@@ -61,7 +61,7 @@ public class ChessGame {
             return null;
         }
         Collection<ChessMove> validMoves = piece.pieceMoves(Board, startPosition);
-        validMoves.removeIf(move -> isInCheckPos(turn, move.getEndPosition().getRow(), move.getEndPosition().getColumn()));
+        validMoves.removeIf(move -> !isInCheckPos(turn, move.getEndPosition().getRow(), move.getEndPosition().getColumn(), true).isEmpty());
 
         return validMoves;
     }
@@ -76,7 +76,7 @@ public class ChessGame {
 
     }
 
-    private boolean isAttackedByPieces(int kingRow, int kingCol, int[][] directions, ChessPiece.PieceType[] enemyTypes, TeamColor color, boolean isSlider) {
+    private int[] getAttackingPiece(int kingRow, int kingCol, int[][] directions, ChessPiece.PieceType[] enemyTypes, TeamColor color, boolean isSlider) {
         int newRow;
         int newCol;
         int max = 2;
@@ -92,7 +92,7 @@ public class ChessGame {
                     if (newPiece != null) {
                         for (ChessPiece.PieceType type : enemyTypes) {
                             if (type == newPiece.getPieceType() && newPiece.getTeamColor() != color) {
-                                return true;
+                                return new int[]{newRow, newCol};
                             }
                         }
 
@@ -104,38 +104,54 @@ public class ChessGame {
                 }
             }
         }
-        return false;
+        return new int[]{};
     }
 
-    public boolean isInCheckPos(TeamColor teamColor, int kingRow, int kingCol) {
+    public ArrayList<int[]> isInCheckPos(TeamColor teamColor, int kingRow, int kingCol, boolean includeKing) {
         int[][] diagonal_indexes = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
         int[][] vertical_indexes = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
         int[][] knight_indexes = {{1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1}};
         int[][] king_indexes = {{-1, 1}, {0, 1}, {1, 1}, {-1, 0}, {1, 0}, {-1, -1}, {0, -1}, {1, -1}};
         int[][] pawn_indexes;
+        ArrayList<int[]> attackingPieces = new ArrayList<>();
+        int[] attackingPiece;
         if (teamColor == TeamColor.WHITE) {
             pawn_indexes = new int[][]{{1, 1}, {1, -1}};
         }
         else {
             pawn_indexes = new int[][]{{-1, 1}, {-1, -1}};
         }
-        if (isAttackedByPieces(kingRow, kingCol, diagonal_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.BISHOP}, teamColor, true)) {
-            return true;
+        attackingPiece = getAttackingPiece(kingRow, kingCol, diagonal_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.QUEEN}, teamColor, true);
+        if (!Arrays.equals(attackingPiece, new int[]{})) {
+            attackingPieces.add(attackingPiece);
         }
-        if (isAttackedByPieces(kingRow, kingCol, vertical_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.ROOK}, teamColor, true)) {
-            return true;
+        attackingPiece = getAttackingPiece(kingRow, kingCol, diagonal_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.BISHOP}, teamColor, true);
+        if (!Arrays.equals(attackingPiece, new int[]{})) {
+            attackingPieces.add(attackingPiece);
         }
-        if (isAttackedByPieces(kingRow, kingCol, knight_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.KNIGHT}, teamColor, false)) {
-            return true;
+        attackingPiece = getAttackingPiece(kingRow, kingCol, vertical_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.ROOK}, teamColor, true);
+        if (!Arrays.equals(attackingPiece, new int[]{})) {
+            attackingPieces.add(attackingPiece);
         }
-        if (isAttackedByPieces(kingRow, kingCol, pawn_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.PAWN}, teamColor, false)) {
-            return true;
+        attackingPiece = getAttackingPiece(kingRow, kingCol, vertical_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.QUEEN}, teamColor, true);
+        if (!Arrays.equals(attackingPiece, new int[]{})) {
+            attackingPieces.add(attackingPiece);
         }
-        if (isAttackedByPieces(kingRow, kingCol, king_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.KING}, teamColor, false)) {
-            return true;
+        attackingPiece = getAttackingPiece(kingRow, kingCol, knight_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.KNIGHT}, teamColor, false);
+        if (!Arrays.equals(attackingPiece, new int[]{})) {
+            attackingPieces.add(attackingPiece);
         }
-
-        return false;
+        attackingPiece = getAttackingPiece(kingRow, kingCol, pawn_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.PAWN}, teamColor, false);
+        if (!Arrays.equals(attackingPiece, new int[]{})) {
+            attackingPieces.add(attackingPiece);
+        }
+        if (includeKing) {
+            attackingPiece = getAttackingPiece(kingRow, kingCol, king_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.KING}, teamColor, false);
+            if (!Arrays.equals(attackingPiece, new int[]{})) {
+                attackingPieces.add(attackingPiece);
+            }
+        }
+        return attackingPieces;
     }
 
     /**
@@ -155,7 +171,26 @@ public class ChessGame {
             kingRow = Board.getBlackKingPos()[0];
             kingCol = Board.getBlackKingPos()[1];
         }
-        return isInCheckPos(teamColor, kingRow, kingCol);
+        return !isInCheckPos(teamColor, kingRow, kingCol, true).isEmpty();
+    }
+
+    public boolean isTheAttackingPieceCapturable(TeamColor teamColor, int kingRow, int kingCol) {
+        TeamColor enemyColor;
+        if (teamColor == TeamColor.WHITE) {
+            enemyColor = TeamColor.BLACK;
+        }
+        else {
+            enemyColor = TeamColor.WHITE;
+        }
+        ArrayList<int[]> attackingPieces;
+        ArrayList<int[]> attackingPiecesOfAttackingPiece = new ArrayList<>();
+        attackingPieces = isInCheckPos(teamColor, kingRow, kingCol, false);
+        if (attackingPieces.size() == 2) {
+            return false;
+        }
+        int[] attackingPiece = attackingPieces.getFirst();
+        attackingPiecesOfAttackingPiece = isInCheckPos(enemyColor, attackingPiece[0], attackingPiece[1], false);
+        return !attackingPiecesOfAttackingPiece.isEmpty();
     }
 
     /**
@@ -175,7 +210,10 @@ public class ChessGame {
             kingRow = Board.getBlackKingPos()[0];
             kingCol = Board.getBlackKingPos()[1];
         }
-        return isInCheck(teamColor) && validMoves(new ChessPosition(kingRow, kingCol)).isEmpty();
+        if (isInCheck(teamColor) && validMoves(new ChessPosition(kingRow, kingCol)).isEmpty()) {
+            return !isTheAttackingPieceCapturable(teamColor, kingRow, kingCol);
+        }
+        return false;
     }
 
     /**
@@ -196,6 +234,7 @@ public class ChessGame {
             kingRow = Board.getBlackKingPos()[0];
             kingCol = Board.getBlackKingPos()[1];
         }
+        // need to check if all pieces have no moves, not just the king
         return !isInCheck(teamColor) && validMoves(new ChessPosition(kingRow, kingCol)).isEmpty();
     }
 
