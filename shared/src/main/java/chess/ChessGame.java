@@ -61,11 +61,7 @@ public class ChessGame {
             return null;
         }
         Collection<ChessMove> validMoves = piece.pieceMoves(Board, startPosition);
-        for (ChessMove move : validMoves) {
-            if (isInCheck(turn)) {
-                validMoves.remove(move);
-            }
-        }
+        validMoves.removeIf(move -> isInCheckPos(turn, move.getEndPosition().getRow(), move.getEndPosition().getColumn()));
 
         return validMoves;
     }
@@ -111,27 +107,16 @@ public class ChessGame {
         return false;
     }
 
-    /**
-     * Determines if the given team is in check
-     *
-     * @param teamColor which team to check for check
-     * @return True if the specified team is in check
-     */
-    public boolean isInCheck(TeamColor teamColor) {
-        int kingRow;
-        int kingCol;
+    public boolean isInCheckPos(TeamColor teamColor, int kingRow, int kingCol) {
         int[][] diagonal_indexes = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
         int[][] vertical_indexes = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
         int[][] knight_indexes = {{1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1}};
+        int[][] king_indexes = {{-1, 1}, {0, 1}, {1, 1}, {-1, 0}, {1, 0}, {-1, -1}, {0, -1}, {1, -1}};
         int[][] pawn_indexes;
         if (teamColor == TeamColor.WHITE) {
-            kingRow = Board.getWhiteKingPos()[0];
-            kingCol = Board.getWhiteKingPos()[1];
             pawn_indexes = new int[][]{{1, 1}, {1, -1}};
         }
         else {
-            kingRow = Board.getBlackKingPos()[0];
-            kingCol = Board.getBlackKingPos()[1];
             pawn_indexes = new int[][]{{-1, 1}, {-1, -1}};
         }
         if (isAttackedByPieces(kingRow, kingCol, diagonal_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.BISHOP}, teamColor, true)) {
@@ -146,7 +131,31 @@ public class ChessGame {
         if (isAttackedByPieces(kingRow, kingCol, pawn_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.PAWN}, teamColor, false)) {
             return true;
         }
+        if (isAttackedByPieces(kingRow, kingCol, king_indexes, new ChessPiece.PieceType[]{ChessPiece.PieceType.KING}, teamColor, false)) {
+            return true;
+        }
+
         return false;
+    }
+
+    /**
+     * Determines if the given team is in check
+     *
+     * @param teamColor which team to check for check
+     * @return True if the specified team is in check
+     */
+    public boolean isInCheck(TeamColor teamColor) {
+        int kingRow;
+        int kingCol;
+        if (teamColor == TeamColor.WHITE) {
+            kingRow = Board.getWhiteKingPos()[0];
+            kingCol = Board.getWhiteKingPos()[1];
+        }
+        else {
+            kingRow = Board.getBlackKingPos()[0];
+            kingCol = Board.getBlackKingPos()[1];
+        }
+        return isInCheckPos(teamColor, kingRow, kingCol);
     }
 
     /**
@@ -156,7 +165,17 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        int kingRow;
+        int kingCol;
+        if (teamColor == TeamColor.WHITE) {
+            kingRow = Board.getWhiteKingPos()[0];
+            kingCol = Board.getWhiteKingPos()[1];
+        }
+        else {
+            kingRow = Board.getBlackKingPos()[0];
+            kingCol = Board.getBlackKingPos()[1];
+        }
+        return isInCheck(teamColor) && validMoves(new ChessPosition(kingRow, kingCol)).isEmpty();
     }
 
     /**
@@ -167,7 +186,17 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        int kingRow;
+        int kingCol;
+        if (teamColor == TeamColor.WHITE) {
+            kingRow = Board.getWhiteKingPos()[0];
+            kingCol = Board.getWhiteKingPos()[1];
+        }
+        else {
+            kingRow = Board.getBlackKingPos()[0];
+            kingCol = Board.getBlackKingPos()[1];
+        }
+        return !isInCheck(teamColor) && validMoves(new ChessPosition(kingRow, kingCol)).isEmpty();
     }
 
     /**
