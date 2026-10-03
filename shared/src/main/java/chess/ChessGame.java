@@ -60,10 +60,25 @@ public class ChessGame {
         if (piece == null) {
             return null;
         }
+
         Collection<ChessMove> validMoves = piece.pieceMoves(Board, startPosition);
         if (piece.getPieceType() == ChessPiece.PieceType.KING) {
             validMoves.removeIf(move -> !isInCheckPos(turn, move.getEndPosition().getRow(), move.getEndPosition().getColumn(), true).isEmpty());
         }
+        if (isInCheck(piece.getTeamColor())) {
+            for (ChessMove move : validMoves) {
+                ChessBoard newBoard = Board;
+                newBoard.addPiece(move.getEndPosition(), piece);
+                newBoard.removePiece(startPosition);
+                if (isInCheck(piece.getTeamColor())) {
+                    validMoves.remove(move);
+                }
+            }
+
+
+        }
+
+
 
         return validMoves;
     }
