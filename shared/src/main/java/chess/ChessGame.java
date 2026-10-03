@@ -95,7 +95,7 @@ public class ChessGame {
         ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
         ChessPiece newPiece = Board.getPiece(new ChessPosition(startPos.getRow(), startPos.getColumn()));
         Collection<ChessMove> validMoves = validMoves(startPos);
-        if (validMoves == null || !validMoves.contains(move)) {
+        if (validMoves == null || !validMoves.contains(move) || newPiece.getTeamColor() != turn) {
             throw new InvalidMoveException("Invalid move: " + move);
         }
         else {
