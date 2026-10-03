@@ -102,7 +102,12 @@ public class ChessGame {
             Board.addPiece(endPos, newPiece);
             Board.removePiece(startPos);
         }
-
+        if (newPiece.getTeamColor() == TeamColor.WHITE) {
+            turn = TeamColor.BLACK;
+        }
+        else {
+            turn = TeamColor.WHITE;
+        }
     }
 
     private int[] getAttackingPiece(int kingRow, int kingCol, int[][] directions, ChessPiece.PieceType[] enemyTypes, TeamColor color, boolean isSlider) {
