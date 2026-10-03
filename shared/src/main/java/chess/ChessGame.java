@@ -74,8 +74,6 @@ public class ChessGame {
                     validMoves.remove(move);
                 }
             }
-
-
         }
 
 
@@ -99,7 +97,12 @@ public class ChessGame {
             throw new InvalidMoveException("Invalid move: " + move);
         }
         else {
-            Board.addPiece(endPos, newPiece);
+            if (promotionPiece != null) {
+                Board.addPiece(endPos, new ChessPiece(newPiece.getTeamColor(), promotionPiece));
+            }
+            else {
+                Board.addPiece(endPos, newPiece);
+            }
             Board.removePiece(startPos);
         }
         if (newPiece.getTeamColor() == TeamColor.WHITE) {
