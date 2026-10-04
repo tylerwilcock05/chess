@@ -14,10 +14,74 @@ public class ChessBoard {
     private ChessPiece[][] board = new ChessPiece[8][8];
     private int[] whiteKingPos;
     private int[] blackKingPos;
+    private boolean hasMovedWhiteKing;
+    private boolean hasMovedBlackKing;
+    private boolean hasMovedRightWhiteRook;
+    private boolean hasMovedLeftWhiteRook;
+    private boolean hasMovedRightBlackRook;
+    private boolean hasMovedLeftBlackRook;
 
     public ChessBoard() {
         whiteKingPos = new int[]{1, 5};
         blackKingPos = new int[]{8, 5};
+        hasMovedWhiteKing = false;
+        hasMovedBlackKing = false;
+        hasMovedWhiteKing = false;
+        hasMovedBlackKing = false;
+        hasMovedRightWhiteRook = false;
+        hasMovedLeftWhiteRook = false;
+        hasMovedRightBlackRook = false;
+        hasMovedLeftBlackRook = false;
+    }
+
+    public boolean hasMovedWK() {
+        return hasMovedWhiteKing;
+    }
+
+    public boolean hasMovedBK() {
+        return hasMovedBlackKing;
+    }
+
+    void setHasMovedWK(boolean bool) {
+        hasMovedWhiteKing = bool;
+    }
+
+    void setHasMovedBK(boolean bool) {
+        hasMovedBlackKing = bool;
+    }
+
+
+
+    public boolean hasMovedRWR() {
+        return hasMovedRightWhiteRook;
+    }
+
+    public boolean hasMovedLWR() {
+        return hasMovedLeftWhiteRook;
+    }
+
+    public boolean hasMovedRBR() {
+        return hasMovedRightBlackRook;
+    }
+
+    public boolean hasMovedLBR() {
+        return hasMovedLeftBlackRook;
+    }
+
+    void setHasMovedRWR(boolean bool) {
+        hasMovedRightWhiteRook = bool;
+    }
+
+    void setHasMovedLWR(boolean bool) {
+        hasMovedLeftWhiteRook = bool;
+    }
+
+    void setHasMovedRBR(boolean bool) {
+        hasMovedRightBlackRook = bool;
+    }
+
+    void setHasMovedLBR(boolean bool) {
+        hasMovedLeftBlackRook = bool;
     }
 
     public int[] getWhiteKingPos() {
@@ -43,13 +107,15 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        board[position.getRow()-1][position.getColumn()-1] = piece;
-        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
-            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                setWhiteKingPos(position.getRow(), position.getColumn());
-            }
-            else {
-                setBlackKingPos(position.getRow(), position.getColumn());
+        board[position.getRow() - 1][position.getColumn() - 1] = piece;
+
+        if (piece != null) {
+            if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                    whiteKingPos = new int[]{position.getRow(), position.getColumn()};
+                } else {
+                    blackKingPos = new int[]{position.getRow(), position.getColumn()};
+                }
             }
         }
     }
