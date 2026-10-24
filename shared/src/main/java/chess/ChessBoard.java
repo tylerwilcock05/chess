@@ -26,63 +26,73 @@ public class ChessBoard {
         blackKingPos = new int[]{8, 5};
         hasMovedWhiteKing = false;
         hasMovedBlackKing = false;
-        hasMovedWhiteKing = false;
-        hasMovedBlackKing = false;
         hasMovedRightWhiteRook = false;
         hasMovedLeftWhiteRook = false;
         hasMovedRightBlackRook = false;
         hasMovedLeftBlackRook = false;
     }
 
-    public boolean hasMovedWK() {
+    public boolean hasMovedWhiteKing() {
         return hasMovedWhiteKing;
     }
 
-    public boolean hasMovedBK() {
+    public boolean hasMovedBlackKing() {
         return hasMovedBlackKing;
     }
 
-    void setHasMovedWK(boolean bool) {
+    void setHasMovedWhiteKing(boolean bool) {
         hasMovedWhiteKing = bool;
     }
 
-    void setHasMovedBK(boolean bool) {
+    void setHasMovedBlackKing(boolean bool) {
         hasMovedBlackKing = bool;
     }
 
-
-
-    public boolean hasMovedRWR() {
+    public boolean hasMovedRightWhiteRook() {
         return hasMovedRightWhiteRook;
     }
 
-    public boolean hasMovedLWR() {
+    public boolean hasMovedLeftWhiteRook() {
         return hasMovedLeftWhiteRook;
     }
 
-    public boolean hasMovedRBR() {
+    public boolean hasMovedRightBlackRook() {
         return hasMovedRightBlackRook;
     }
 
-    public boolean hasMovedLBR() {
+    public boolean hasMovedLeftBlackRook() {
         return hasMovedLeftBlackRook;
     }
 
-    void setHasMovedRWR(boolean bool) {
+    void setHasMovedRightWhiteRook(boolean bool) {
         hasMovedRightWhiteRook = bool;
     }
 
-    void setHasMovedLWR(boolean bool) {
+    void setHasMovedLeftWhiteRook(boolean bool) {
         hasMovedLeftWhiteRook = bool;
     }
 
-    void setHasMovedRBR(boolean bool) {
+    void setHasMovedRightBlackRook(boolean bool) {
         hasMovedRightBlackRook = bool;
     }
 
-    void setHasMovedLBR(boolean bool) {
+    void setHasMovedLeftBlackRook(boolean bool) {
         hasMovedLeftBlackRook = bool;
     }
+
+    // Retained aliases for backward compatibility
+    public boolean hasMovedWK() { return hasMovedWhiteKing(); }
+    public boolean hasMovedBK() { return hasMovedBlackKing(); }
+    void setHasMovedWK(boolean bool) { setHasMovedWhiteKing(bool); }
+    void setHasMovedBK(boolean bool) { setHasMovedBlackKing(bool); }
+    public boolean hasMovedRWR() { return hasMovedRightWhiteRook(); }
+    public boolean hasMovedLWR() { return hasMovedLeftWhiteRook(); }
+    public boolean hasMovedRBR() { return hasMovedRightBlackRook(); }
+    public boolean hasMovedLBR() { return hasMovedLeftBlackRook(); }
+    void setHasMovedRWR(boolean bool) { setHasMovedRightWhiteRook(bool); }
+    void setHasMovedLWR(boolean bool) { setHasMovedLeftWhiteRook(bool); }
+    void setHasMovedRBR(boolean bool) { setHasMovedRightBlackRook(bool); }
+    void setHasMovedLBR(boolean bool) { setHasMovedLeftBlackRook(bool); }
 
     public int[] getWhiteKingPos() {
         return whiteKingPos;

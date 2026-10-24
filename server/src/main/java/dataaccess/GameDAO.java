@@ -1,16 +1,11 @@
 package dataaccess;
 
-import chess.ChessGame;
 import model.GameData;
 
 public interface GameDAO {
-    public GameData createGame(GameData game) throws DataAccessException;
-
-    public GameData getGame(int gameID) throws DataAccessException;
-
-    public GameData[] listGames() throws DataAccessException;
-
-    public void updateGame(GameData game) throws DataAccessException;
-
-    public void clear() throws DataAccessException;
+    GameData createGame(GameData game) throws DataAccessException;
+    GameData getGame(int gameID) throws DataAccessException;
+    GameData[] listGames() throws DataAccessException;
+    void updateGame(GameData game) throws DataAccessException;
+    void clear() throws DataAccessException;
 }

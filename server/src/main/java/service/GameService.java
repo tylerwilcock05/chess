@@ -17,9 +17,7 @@ public class GameService {
 
     public CreateGameResult createGame(String authToken, CreateGameRequest req)
             throws DataAccessException, BadRequestException, UnauthorizedException {
-        if (authToken == null || authDAO.getAuth(authToken) == null) {
-            throw new UnauthorizedException("Error: unauthorized");
-        }
+        authenticate(authToken);
 
         if (req == null || req.gameName() == null || req.gameName().isBlank()) {
             throw new BadRequestException("Error: bad request");
@@ -31,19 +29,13 @@ public class GameService {
     }
 
     public GameData[] listGames(String authToken) throws DataAccessException, UnauthorizedException {
-        if (authToken == null || authDAO.getAuth(authToken) == null) {
-            throw new UnauthorizedException("Error: unauthorized");
-        }
-
+        authenticate(authToken);
         return gameDAO.listGames();
     }
 
     public void joinGame(String authToken, JoinGameRequest req)
             throws DataAccessException, BadRequestException, UnauthorizedException, AlreadyTakenException {
-        AuthData auth = authDAO.getAuth(authToken);
-        if (auth == null) {
-            throw new UnauthorizedException("Error: unauthorized");
-        }
+        AuthData auth = authenticate(authToken);
 
         if (req == null || req.gameID() == null || req.playerColor() == null) {
             throw new BadRequestException("Error: bad request");
@@ -69,5 +61,16 @@ public class GameService {
         }
 
         gameDAO.updateGame(game);
+    }
+
+    private AuthData authenticate(String authToken) throws UnauthorizedException, DataAccessException {
+        if (authToken == null || authToken.isBlank()) {
+            throw new UnauthorizedException("Error: unauthorized");
+        }
+        AuthData auth = authDAO.getAuth(authToken);
+        if (auth == null) {
+            throw new UnauthorizedException("Error: unauthorized");
+        }
+        return auth;
     }
 }
