@@ -92,13 +92,10 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        int row = myPosition.getRow();
-        int col = myPosition.getColumn();
-        int newRow;
-        int newCol;
-        Collection<ChessMove> validMoves = new ArrayList<>(27);
         ChessPiece currentPiece = board.getPiece(myPosition);
-        ChessGame.TeamColor currentColor = currentPiece.pieceColor;
+        if (currentPiece == null) {
+            return List.of();
+        }
 
         if (currentPiece.getPieceType() == PieceType.KNIGHT) {
             int[][] indexes = {{1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1}};
@@ -126,73 +123,62 @@ public class ChessPiece {
         }
 
         if (currentPiece.getPieceType() == PieceType.PAWN) {
-            int startRow;
-            int promotionRow;
-            int direction;
-            if (currentPiece.pieceColor == ChessGame.TeamColor.WHITE) {
-                startRow = 2;
-                promotionRow = 8;
-                direction = 1;
-            }
-            else {
-                startRow = 7;
-                promotionRow = 1;
-                direction = -1;
-            }
-            newRow = row + direction;
-            newCol = col;
-
-            // check up one
-            if (isInBounds(newRow, newCol)) {
-                ChessPiece newPiece = board.getPiece(new ChessPosition(newRow, newCol));
-                if (newPiece == null) {
-                    if (newRow == promotionRow) {
-                        validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.QUEEN));
-                        validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.KNIGHT));
-                        validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.BISHOP));
-                        validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.ROOK));
-                    }
-                    else {
-                        validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), null));
-                    }
-
-                    // check up two
-                    int up2Row = row + direction * 2;
-                    if (isInBounds(up2Row, newCol) && row == startRow) {
-                        ChessPiece up2Piece = board.getPiece(new ChessPosition(up2Row, newCol));
-                        if (up2Piece == null)
-                        {
-                            validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(up2Row, newCol), null));
-                        }
-                    }
-                }
-            }
-
-            // check captures
-            for (int i = -1; i < 2; i = i + 2) {
-                newRow = row + direction;
-                newCol = col + i;
-                if (isInBounds(newRow, newCol)) {
-                    ChessPiece newPiece = board.getPiece(new ChessPosition(newRow, newCol));
-                    if (newPiece != null && newPiece.pieceColor != currentColor) {
-                        if (newRow == promotionRow) {
-                            validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.QUEEN));
-                            validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.KNIGHT));
-                            validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.BISHOP));
-                            validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), PieceType.ROOK));
-                        }
-                        else {
-                            validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(newRow, newCol), null));
-                        }
-
-                    }
-                }
-            }
-
-            return validMoves;
+            return getPawnMoves(board, myPosition, currentPiece);
         }
 
         return List.of();
+    }
+
+    private Collection<ChessMove> getPawnMoves(ChessBoard board, ChessPosition myPosition, ChessPiece currentPiece) {
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        Collection<ChessMove> validMoves = new ArrayList<>(27);
+        ChessGame.TeamColor currentColor = currentPiece.pieceColor;
+
+        int startRow = 2;
+        int promotionRow = 8;
+        int direction = 1;
+        if (currentColor != ChessGame.TeamColor.WHITE) {
+            startRow = 7;
+            promotionRow = 1;
+            direction = -1;
+        }
+
+        int newRow = row + direction;
+        if (isInBounds(newRow, col) && board.getPiece(new ChessPosition(newRow, col)) == null) {
+            addPawnMove(validMoves, row, col, newRow, col, newRow == promotionRow);
+
+            int up2Row = row + direction * 2;
+            if (row == startRow && isInBounds(up2Row, col) && board.getPiece(new ChessPosition(up2Row, col)) == null) {
+                validMoves.add(new ChessMove(new ChessPosition(row, col), new ChessPosition(up2Row, col), null));
+            }
+        }
+
+        for (int i = -1; i <= 1; i += 2) {
+            int newCol = col + i;
+            if (isInBounds(newRow, newCol)) {
+                ChessPiece newPiece = board.getPiece(new ChessPosition(newRow, newCol));
+                if (newPiece != null && newPiece.pieceColor != currentColor) {
+                    addPawnMove(validMoves, row, col, newRow, newCol, newRow == promotionRow);
+                }
+            }
+        }
+
+        return validMoves;
+    }
+
+    private void addPawnMove(Collection<ChessMove> validMoves, int fromRow, int fromCol,
+                             int toRow, int toCol, boolean isPromotion) {
+        ChessPosition from = new ChessPosition(fromRow, fromCol);
+        ChessPosition to = new ChessPosition(toRow, toCol);
+        if (isPromotion) {
+            validMoves.add(new ChessMove(from, to, PieceType.QUEEN));
+            validMoves.add(new ChessMove(from, to, PieceType.KNIGHT));
+            validMoves.add(new ChessMove(from, to, PieceType.BISHOP));
+            validMoves.add(new ChessMove(from, to, PieceType.ROOK));
+        } else {
+            validMoves.add(new ChessMove(from, to, null));
+        }
     }
 
     @Override

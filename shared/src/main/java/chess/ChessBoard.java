@@ -102,13 +102,6 @@ public class ChessBoard {
         return blackKingPos;
     }
 
-    void setWhiteKingPos(int row, int col) {
-        whiteKingPos = new int[]{row, col};
-    }
-
-    void setBlackKingPos(int row, int col) {
-        blackKingPos = new int[]{row, col};
-    }
 
     /**
      * Adds a chess piece to the chessboard
