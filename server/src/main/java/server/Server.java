@@ -4,8 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.*;
 import io.javalin.*;
 import io.javalin.http.BadRequestResponse;
-import model.AuthData;
-import model.UserData;
+import model.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -22,6 +21,7 @@ public class Server {
     private final GameDAO gameDAO = new MemoryGameDAO();
     private final ClearService clearService = new ClearService(userDAO, authDAO, gameDAO);
     private final UserService userService = new UserService(userDAO, authDAO);
+    private final GameService gameService = new GameService(gameDAO, authDAO);
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
@@ -32,6 +32,9 @@ public class Server {
         javalin.post("/user", this::register);
         javalin.post("/session", this::login);
         javalin.delete("/session", this::logout);
+        javalin.post("/game", this::createGame);
+        javalin.get("/game", this::listGames);
+        javalin.put("/game", this::joinGame);
     }
 
     private void clearDB(@NotNull Context ctx) {
@@ -89,6 +92,62 @@ public class Server {
             ctx.result("{}");
         } catch (UnauthorizedException e) {
             ctx.status(401);
+            ctx.result(new Gson().toJson(Map.of("message", e.getMessage())));
+        } catch (Exception e) {
+            ctx.status(500);
+            ctx.result(new Gson().toJson(Map.of("message", "Error: " + e.getMessage())));
+        }
+    }
+
+    private void createGame(Context ctx) {
+        try {
+            String authToken = ctx.header("Authorization");
+            CreateGameRequest req = new Gson().fromJson(ctx.body(), CreateGameRequest.class);
+            CreateGameResult result = gameService.createGame(authToken, req);
+            ctx.status(200);
+            ctx.result(new Gson().toJson(result));
+        } catch (BadRequestException e) {
+            ctx.status(400);
+            ctx.result(new Gson().toJson(Map.of("message", e.getMessage())));
+        } catch (UnauthorizedException e) {
+            ctx.status(401);
+            ctx.result(new Gson().toJson(Map.of("message", e.getMessage())));
+        } catch (Exception e) {
+            ctx.status(500);
+            ctx.result(new Gson().toJson(Map.of("message", "Error: " + e.getMessage())));
+        }
+    }
+
+    private void listGames(Context ctx) {
+        try {
+            String authToken = ctx.header("Authorization");
+            GameData[] games = gameService.listGames(authToken);
+            ctx.status(200);
+            ctx.result(new Gson().toJson(Map.of("games", games)));
+        } catch (UnauthorizedException e) {
+            ctx.status(401);
+            ctx.result(new Gson().toJson(Map.of("message", e.getMessage())));
+        } catch (Exception e) {
+            ctx.status(500);
+            ctx.result(new Gson().toJson(Map.of("message", "Error: " + e.getMessage())));
+        }
+    }
+
+    private void joinGame(Context ctx) {
+        try {
+            String authToken = ctx.header("Authorization");
+            JoinGameRequest req = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
+            gameService.joinGame(authToken, req);
+            ctx.status(200);
+            ctx.result("{}");
+        } catch (BadRequestException e) {
+            ctx.status(400);
+            ctx.result(new Gson().toJson(Map.of("message", e.getMessage())));
+        } catch (UnauthorizedException e) {
+            ctx.status(401);
+            ctx.result(new Gson().toJson(Map.of("message", e.getMessage())));
+        } catch (AlreadyTakenException e) {
+            ctx.status(403);
             ctx.result(new Gson().toJson(Map.of("message", e.getMessage())));
         } catch (Exception e) {
             ctx.status(500);
