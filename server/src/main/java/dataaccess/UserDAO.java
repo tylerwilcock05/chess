@@ -1,3 +1,7 @@
+package dataaccess;
+
+import model.UserData;
+
 public interface UserDAO {
     public UserData createUser(UserData user) throws DataAccessException;
     public UserData getUser(String username) throws DataAccessException;
