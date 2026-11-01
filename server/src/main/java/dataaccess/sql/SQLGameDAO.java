@@ -3,8 +3,10 @@ package dataaccess.sql;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
+import dataaccess.DatabaseManager;
 import dataaccess.GameDAO;
 import model.GameData;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,24 +23,24 @@ public class SQLGameDAO implements GameDAO {
         String gameJson = new Gson().toJson(chessGame);
 
         try (Connection conn = DatabaseManager.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                stmt.setString(1, game.whiteUsername());
-                stmt.setString(2, game.blackUsername());
-                stmt.setString(3, game.gameName());
-                stmt.setString(4, gameJson);
-                stmt.executeUpdate();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, game.whiteUsername());
+            stmt.setString(2, game.blackUsername());
+            stmt.setString(3, game.gameName());
+            stmt.setString(4, gameJson);
+            stmt.executeUpdate();
 
-                try (ResultSet rs = stmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        int id = rs.getInt(1);
-                        return new GameData(id, game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
-                    }
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    return new GameData(id, game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
                 }
-                throw new DataAccessException("Failed to retrieve generated game ID");
-
-            } catch (SQLException e) {
-                throw new DataAccessException("Error creating game: " + e.getMessage(), e);
             }
+            throw new DataAccessException("Failed to retrieve generated game ID");
+
+        } catch (SQLException e) {
+            throw new DataAccessException("Error creating game: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -46,19 +48,19 @@ public class SQLGameDAO implements GameDAO {
         String sql = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game WHERE gameID = ?";
 
         try (Connection conn = DatabaseManager.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, gameID);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, gameID);
 
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        return readGame(rs);
-                    }
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return readGame(rs);
                 }
-                return null;
-
-            } catch (SQLException e) {
-                throw new DataAccessException("Error getting game: " + e.getMessage(), e);
             }
+            return null;
+
+        } catch (SQLException e) {
+            throw new DataAccessException("Error getting game: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -67,17 +69,17 @@ public class SQLGameDAO implements GameDAO {
         List<GameData> games = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery()) {
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
 
-                while (rs.next()) {
-                    games.add(readGame(rs));
-                }
-                return games.toArray(new GameData[0]);
-
-            } catch (SQLException e) {
-                throw new DataAccessException("Error listing games: " + e.getMessage(), e);
+            while (rs.next()) {
+                games.add(readGame(rs));
             }
+            return games.toArray(new GameData[0]);
+
+        } catch (SQLException e) {
+            throw new DataAccessException("Error listing games: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -86,17 +88,17 @@ public class SQLGameDAO implements GameDAO {
         String gameJson = new Gson().toJson(game.game());
 
         try (Connection conn = DatabaseManager.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, game.whiteUsername());
-                stmt.setString(2, game.blackUsername());
-                stmt.setString(3, game.gameName());
-                stmt.setString(4, gameJson);
-                stmt.setInt(5, game.gameID());
-                stmt.executeUpdate();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, game.whiteUsername());
+            stmt.setString(2, game.blackUsername());
+            stmt.setString(3, game.gameName());
+            stmt.setString(4, gameJson);
+            stmt.setInt(5, game.gameID());
+            stmt.executeUpdate();
 
-            } catch (SQLException e) {
-                throw new DataAccessException("Error updating game: " + e.getMessage(), e);
-            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error updating game: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -104,11 +106,11 @@ public class SQLGameDAO implements GameDAO {
         String sql = "TRUNCATE `game`";
 
         try (Connection conn = DatabaseManager.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.executeUpdate();
-            } catch (SQLException e) {
-                throw new DataAccessException("Error clearing games: " + e.getMessage(), e);
-            }
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Error clearing games: " + e.getMessage(), e);
+        }
     }
 
     private GameData readGame(ResultSet rs) throws SQLException {
