@@ -104,7 +104,7 @@ public class SQLGameDAO implements GameDAO {
         String sql = "TRUNCATE `game`";
 
         try (Connection conn = DatabaseManager.getConnection();
-            PreparedStatement stmt = conn.preparedStatement(sql)) {
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.executeUpdate();
             } catch (SQLException e) {
                 throw new DataAccessException("Error clearing games: " + e.getMessage(), e);
