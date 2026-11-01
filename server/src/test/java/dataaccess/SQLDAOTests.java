@@ -155,7 +155,7 @@ public class SQLDAOTests {
         GameData created = gameDAO.createGame(newGame);
 
         assertNotNull(created);
-        assertTrue(created.gameID > 0, "Generated gameID should be greater than 0");
+        assertTrue(created.gameID() > 0, "Generated gameID should be greater than 0");
         assertEquals("Cool Game", created.gameName());
         assertNotNull(created.game(), "ChessGame board state shouldn't be null");
 
@@ -170,6 +170,6 @@ public class SQLDAOTests {
         GameData invalidGame = new GameData(0, null, null, null, new ChessGame());
         assertThrows(DataAccessException.class, () -> {
             gameDAO.createGame(invalidGame);
-        }
+        };
     }
 }
