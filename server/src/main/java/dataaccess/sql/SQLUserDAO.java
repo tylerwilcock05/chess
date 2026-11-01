@@ -20,7 +20,7 @@ public class SQLUserDAO implements UserDAO {
     public UserData createUser(UserData user) throws DataAccessException {
         String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
 
-        String sql = "INSERT INTO 'user' (username, password, email) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO `user` (username, password, email) VALUES (?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -36,7 +36,7 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
-        String sql = "SELECT username, password, email FROM 'user' WHERE username = ?";
+        String sql = "SELECT username, password, email FROM `user` WHERE username = ?";
         try (Connection conn = DatabaseManager.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, username);
@@ -57,7 +57,7 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public void clear() throws DataAccessException {
-        String sql = "TRUNCATE 'user'";
+        String sql = "TRUNCATE `user`";
         try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.executeUpdate();
