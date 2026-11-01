@@ -7,6 +7,7 @@ import io.javalin.http.Context;
 import model.*;
 import org.jetbrains.annotations.NotNull;
 import service.*;
+import dataacess.sql.*;
 
 import java.util.Map;
 
@@ -14,19 +15,27 @@ public class Server {
 
     private final Javalin javalin;
     private final Gson gson = new Gson();
-    try {
-        private final UserDAO userDAO = new SQLUserDAO();
-        private final AuthDAO authDAO = new SQLAuthDAO();
-        private final GameDAO gameDAO = new SQLGameDAO();
-    } catch (DataAccessException e) {
-        throw new RuntimeException("Failed to initialize database: " + e.getMessage(), e);
-    }
-    private final ClearService clearService = new ClearService(userDAO, authDAO, gameDAO);
-    private final UserService userService = new UserService(userDAO, authDAO);
-    private final GameService gameService = new GameService(gameDAO, authDAO);
+    private final UserDAO userDAO;
+    private final AuthDAO authDAO;
+    private final GameDAO gameDAO;
+    private final ClearService clearService;
+    private final UserService userService;
+    private final GameService gameService;
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
+
+        try {
+            userDAO = new SQLUserDAO();
+            authDAO = new SQLAuthDAO();
+            gameDAO = new SQLGameDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Failed to initialize database: " + e.getMessage(), e);
+        }
+
+        clearService = new ClearService(userDAO, authDAO, gameDAO);
+        userService = new UserService(userDAO, authDAO);
+        gameService = new GameService(gameDAO, authDAO);
 
         // Register your endpoints and exception handlers here.
         javalin.delete("/db", this::clearDB);
