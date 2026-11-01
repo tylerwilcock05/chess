@@ -67,10 +67,10 @@ public class SQLAuthDAO implements AuthDAO {
     public void clear() throws DataAccessException {
         String sql = "TRUNCATE `auth`";
         try (Connection conn = DatabaseManager.getConnection();
-            PreparedStatment stmt = conn.prepareStatement(sql)) {
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.executeUpdate();
             } catch (SQLException e) {
-                throw new DataAccessException("Error clearing auth table: " + e.getMessage, e);
+                throw new DataAccessException("Error clearing auth table: " + e.getMessage(), e);
             }
     }
 }
