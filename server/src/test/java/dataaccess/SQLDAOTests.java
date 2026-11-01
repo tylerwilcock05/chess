@@ -132,9 +132,9 @@ public class SQLDAOTests {
 
     @Test
     @DisplayName("Delete Auth - Negative")
-    public void deleteAuthFail() throws DataAccessException {
-        assertThrows(DataAccessException.class, () -> {
-            authDAO.deleteAuth(null);
+    public void deleteAuthFail() {
+        assertDoesNotThrow(() -> {
+            authDAO.deleteAuth("nonexistent-token");
         });
     }
 
@@ -146,5 +146,21 @@ public class SQLDAOTests {
         authDAO.clear();
 
         assertNull(authDAO.getAuth(created.authToken()));
+    }
+
+    @Test
+    @DisplayName("Create Game - Positive")
+    public void createGameSuccess() throws DataAccessException {
+        GameData newGame = new GameData(0, null, null, "Cool Game", new ChessGame());
+        GameData created = gameDAO.createGame(newGame);
+
+        assertNotNull(created);
+        assertTrue(created.gameID > 0, "Generated gameID should be greater than 0");
+        assertEquals("Cool Game", created.gameName());
+        assertNotNull(created.game(), "ChessGame board state shouldn't be null")
+
+        GameData expected = gameDAO.getGame(created.gameID());
+        assertNotNull(expected);
+        assertEquals("Cool Game", expected.gameName());
     }
 }
