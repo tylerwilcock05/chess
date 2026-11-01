@@ -25,7 +25,7 @@ public class SQLAuthDAO implements AuthDAO {
                     stmt.setString(1, token);
                     stmt.setString(2, username);
                     stmt.executeUpdate();
-                    return new AuthData(token, username)
+                    return new AuthData(token, username);
                 } catch (SQLException e) {
                     throw new DataAccessException("Error creating auth token: " + e.getMessage(), e);
                 }
@@ -60,6 +60,17 @@ public class SQLAuthDAO implements AuthDAO {
                 stmt.executeUpdate();
             } catch (SQLException e) {
                 throw new DataAccessException("Error deleting auth token: " + e.getMessage(), e);
+            }
+    }
+
+    @Override
+    public void clear() throws DataAccessException {
+        String sql = "TRUNCATE `auth`";
+        try (Connection conn = DatabaseManager.getConnection();
+            PreparedStatment stmt = conn.prepareStatement(sql)) {
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw new DataAccessException("Error clearing auth table: " + e.getMessage, e);
             }
     }
 }
