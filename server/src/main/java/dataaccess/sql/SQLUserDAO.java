@@ -54,4 +54,15 @@ public class SQLUserDAO implements UserDAO {
             throw new DataAccessException("Error getting user: " + e.getMessage(), e);
         }
     }
+
+    @Override
+    public void clear() throws DataAccessException {
+        String sql = "TRUNCATE 'user'";
+        try (Connection conn = DatabaseManager.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw new DataAccessException("Error clearing users: " + e.getMessage(), e);
+            }
+    }
 }
