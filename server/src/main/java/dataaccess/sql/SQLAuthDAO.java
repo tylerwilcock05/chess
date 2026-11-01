@@ -30,4 +30,24 @@ public class SQLAuthDAO implements AuthDAO {
                     throw new DataAccessException("Error creating auth token: " + e.getMessage(), e);
                 }
     }
+
+    @Override 
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        String sql = "SELECT authToken, username FROM `auth` WHERE authToken = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, authToken);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return new AuthData(
+                            rs.getString("authToken"),
+                            rs.getString("username")
+                        );
+                    }
+                }
+                return null;
+            } catch (SQLException e) {
+                throw new DataAccessException("Error getting auth token: " + e.getMessage(), e);
+            }
+    }
 }
