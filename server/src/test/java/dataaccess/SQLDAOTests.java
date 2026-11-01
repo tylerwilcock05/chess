@@ -101,4 +101,21 @@ public class SQLDAOTests {
             authDAO.createAuth(null);
         });
     }
+
+    @Test
+    @DisplayName("Get Auth - Positive")
+    public void getAuthSuccess() throws DataAccessException {
+        AuthData created = authDAO.createAuth("alice");
+        AuthData found = authDAO.getAuth(created.authToken());
+        assertNotNull(found);
+        assertEquals(created.authToken(), found.authToken());
+        assertEquals("alice", found.username());
+    }
+
+    @Test
+    @DisplayName("Get Auth - Negative")
+    public void getAuthFail() throws DataAccessException {
+        AuthData found = authDAO.getAuth("invalid-token");
+        assertNull(found);
+    }
 }
