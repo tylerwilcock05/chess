@@ -61,6 +61,25 @@ public class SQLGameDAO implements GameDAO {
             }
     }
 
+    @Override
+    public GameData[] listGames() throws DataAccessException {
+        String sql = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM `game`";
+        List<GameData> games = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+            PreparedStatement stmt = conn.pepareStatement(sql);
+            ResultSet rs = stmt.executeQuery()) {
+
+                while (rs.next()) {
+                    games.add(readGame(rs));
+                }
+                return games.toArray(new GameData[0]);
+
+            } catch (SQLException e) {
+                throw new DataAccessException("Error listing games: " + e.getMessage(), e);
+            }
+    }
+
     private GameData readGame(ResultSet rs) throws SQLException {
         int id = rs.getInt("gameID");
         String whiteUsername = rs.getString("whiteUsername");
