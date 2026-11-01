@@ -118,4 +118,23 @@ public class SQLDAOTests {
         AuthData found = authDAO.getAuth("invalid-token");
         assertNull(found);
     }
+
+    @Test
+    @DisplayName("Delete Auth - Positive")
+    public void deleteAuthSuccess() throws DataAccessException {
+        AuthData created = authDAO.creatAuth("alice");
+        assertNotNull(authDAO.getAuth(created.authToken()));
+
+        authDAO.deleteAuth(created.authToken());
+
+        assertNull(authDAO.getAuth(created.authToken()));
+    }
+
+    @Test
+    @DisplayName("Delete Auth - Negative")
+    public void deleteAuthFail() throws DataAccessException {
+        assertThrows(DataAccessException.class, () -> {
+            authDAO.deleteAuth(null);
+        });
+    }
 }
