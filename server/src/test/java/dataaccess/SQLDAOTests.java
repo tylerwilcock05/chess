@@ -48,4 +48,22 @@ public class SQLDAOTests {
             userDAO.createUser(newUser);
         });
     }
+
+    @Test
+    @DisplayName("Get User - Positive")
+    public void getUserSuccess() throws DataAccessException {
+        UserData newUser = new UserData("alice", "password123", "alice@byu.edu");
+        userDAO.createUser(newUser);
+
+        UserData found = userDAO.getUser("alice");
+        assertNotNull(found);
+        assertEquals("alice", found.username());
+    }
+
+    @Test
+    @DisplayName("Get User - Negative")
+    public void getUserFail() throws DataAccessException {
+        UserData found = userDAO.getUser("alice");
+        assertNull(found);
+    }
 }
