@@ -37,4 +37,15 @@ public class SQLDAOTests {
         assertEquals("alice", expected.username());
         assertEquals("alice@byu.edu", expected.email());
     }
+
+    @Test
+    @DisplayName("Create User - Negative")
+    public void createUserDuplicate() throws DataAccessException {
+        UserData newUser = new UserData("alice", "password123", "alice@byu.edu");
+        userDAO.createUser(newUser);
+
+        assertThrows(DataAccessException.class, () -> {
+            userDAO.createUser(newUser);
+        });
+    }
 }
