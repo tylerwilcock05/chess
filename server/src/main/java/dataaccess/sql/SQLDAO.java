@@ -35,4 +35,17 @@ public class SQLDAO {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
     };
+
+    public static void configureDatabase() throws DataAccessException {
+        DatabaseManager.createDatabase();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            for (String statement : CREATE_STATEMENTS) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Unable to configure database: " + ex.getMessage(), ex);
+        }
+    }
 }
