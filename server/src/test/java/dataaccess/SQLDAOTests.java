@@ -170,6 +170,6 @@ public class SQLDAOTests {
         GameData invalidGame = new GameData(0, null, null, null, new ChessGame());
         assertThrows(DataAccessException.class, () -> {
             gameDAO.createGame(invalidGame);
-        };
+        });
     }
 }
