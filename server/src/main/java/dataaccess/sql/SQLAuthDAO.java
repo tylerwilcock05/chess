@@ -50,4 +50,16 @@ public class SQLAuthDAO implements AuthDAO {
                 throw new DataAccessException("Error getting auth token: " + e.getMessage(), e);
             }
     }
+
+    @Override
+    public void deleteAuth(String authToken) throws DataAccessException {
+        String sql = "DELETE FROM `auth` WHERE authToken = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, authToken);
+                stmt.executeUpdate();
+            } catch (SQL Exception e) {
+                throw new DataAccessException("Error deleting auth token: " + e.getMessa)
+            }
+    }
 }
