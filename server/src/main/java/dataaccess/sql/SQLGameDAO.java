@@ -40,4 +40,24 @@ public class SQLGameDAO implements GameDAO {
                 throw new DataAccessException("Error creating game: " + e.getMessage(), e);
             }
     }
+
+    @Override
+    public GameData getGame(int gameID) throws DataAccessException {
+        String sql = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game WHERE gameID = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, gameID);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return readGame(rs);
+                    }
+                }
+                return null;
+
+            } catch (SQLException e) {
+                throw new DataAccessException("Error getting game: " + e.getMessage(), e);
+            }
+    }
 }
