@@ -66,4 +66,13 @@ public class SQLDAOTests {
         UserData found = userDAO.getUser("alice");
         assertNull(found);
     }
+
+    @Test
+    @DisplayName("Clear Users")
+    public void clearUsers() throws DataAccessException {
+        userDAO.createUser(new UserData("alice", "password123", "alice@byu.edu"));
+        userDAO.clear();
+
+        assertNull(userDAO.getUser("alice"))
+    }
 }
