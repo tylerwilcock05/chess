@@ -14,9 +14,13 @@ public class Server {
 
     private final Javalin javalin;
     private final Gson gson = new Gson();
-    private final UserDAO userDAO = new MemoryUserDAO();
-    private final AuthDAO authDAO = new MemoryAuthDAO();
-    private final GameDAO gameDAO = new MemoryGameDAO();
+    try {
+        private final UserDAO userDAO = new SQLUserDAO();
+        private final AuthDAO authDAO = new SQLAuthDAO();
+        private final GameDAO gameDAO = new SQLGameDAO();
+    } catch (DataAccessException e) {
+        throw new RuntimeException("Failed to initialize database: " + e.getMessage(), e);
+    }
     private final ClearService clearService = new ClearService(userDAO, authDAO, gameDAO);
     private final UserService userService = new UserService(userDAO, authDAO);
     private final GameService gameService = new GameService(gameDAO, authDAO);
