@@ -73,6 +73,6 @@ public class SQLDAOTests {
         userDAO.createUser(new UserData("alice", "password123", "alice@byu.edu"));
         userDAO.clear();
 
-        assertNull(userDAO.getUser("alice"))
+        assertNull(userDAO.getUser("alice"));;
     }
 }
