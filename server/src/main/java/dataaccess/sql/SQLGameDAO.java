@@ -60,4 +60,15 @@ public class SQLGameDAO implements GameDAO {
                 throw new DataAccessException("Error getting game: " + e.getMessage(), e);
             }
     }
+
+    private GameData readGame(ResultSet rs) throws SQLException {
+        int id = rs.getInt("gameID");
+        String whiteUsername = rs.getString("whiteUsername");
+        String blackUsername = rs.getString("blackUsername");
+        String gameName = rs.getString("gameName");
+        String json = rs.getString("game");
+
+        ChessGame game = new Gson().fromJson(json, ChessGame.class);
+        return new GameData(id, whiteUsername, blackUsername, gameName, game);
+    }
 }
