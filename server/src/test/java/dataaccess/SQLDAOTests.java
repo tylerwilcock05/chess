@@ -122,7 +122,7 @@ public class SQLDAOTests {
     @Test
     @DisplayName("Delete Auth - Positive")
     public void deleteAuthSuccess() throws DataAccessException {
-        AuthData created = authDAO.creatAuth("alice");
+        AuthData created = authDAO.createAuth("alice");
         assertNotNull(authDAO.getAuth(created.authToken()));
 
         authDAO.deleteAuth(created.authToken());
@@ -136,5 +136,15 @@ public class SQLDAOTests {
         assertThrows(DataAccessException.class, () -> {
             authDAO.deleteAuth(null);
         });
+    }
+
+    @Test
+    @DisplayName("Clear Auth")
+    public void clearAuth() throws DataAccessException {
+        AuthData created = authDAO.createAuth("alice");
+
+        authDAO.clear();
+
+        assertNull(authDAO.getAuth(created.authToken()));
     }
 }
