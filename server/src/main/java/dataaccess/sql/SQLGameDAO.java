@@ -34,7 +34,7 @@ public class SQLGameDAO implements GameDAO {
                         return new GameData(id, game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
                     }
                 }
-                throw new DataAccessException("Failed to retrieve generated game ID")
+                throw new DataAccessException("Failed to retrieve generated game ID");
 
             } catch (SQLException e) {
                 throw new DataAccessException("Error creating game: " + e.getMessage(), e);
@@ -67,7 +67,7 @@ public class SQLGameDAO implements GameDAO {
         List<GameData> games = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();
-            PreparedStatement stmt = conn.pepareStatement(sql);
+            PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery()) {
 
                 while (rs.next()) {
@@ -86,7 +86,7 @@ public class SQLGameDAO implements GameDAO {
         String gameJson = new Gson().toJson(game.game());
 
         try (Connection conn = DatabaseManager.getConnection();
-            PreapredStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, game.whiteUsername());
                 stmt.setString(2, game.blackUsername());
                 stmt.setString(3, game.gameName());
@@ -96,6 +96,18 @@ public class SQLGameDAO implements GameDAO {
 
             } catch (SQLException e) {
                 throw new DataAccessException("Error updating game: " + e.getMessage(), e);
+            }
+    }
+
+    @Override
+    public void clear() throws DataAccessException {
+        String sql = "TRUNCATE `game`";
+
+        try (Connection conn = DatabaseManager.getConnection();
+            PreparedStatement stmt = conn.preparedStatement(sql)) {
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw new DataAccessException("Error clearing games: " + e.getMessage(), e);
             }
     }
 
