@@ -13,7 +13,7 @@ import java.util.UUID;
 public class SQLAuthDAO implements AuthDAO {
     
     public SQLAuthDAO() throws DataAccessException {
-        SQLAuthDAO.configureDatabase();
+        SQLDAO.configureDatabase();
     }
 
     @Override
