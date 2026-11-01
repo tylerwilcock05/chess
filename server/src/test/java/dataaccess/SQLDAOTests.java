@@ -23,6 +23,8 @@ public class SQLDAOTests {
         userDAO.clear();
     }
 
+    // UserDAO Tests
+
     @Test
     @DisplayName("Create User - Positive")
     public void createUserSuccess() throws DataAccessException {
@@ -74,5 +76,29 @@ public class SQLDAOTests {
         userDAO.clear();
 
         assertNull(userDAO.getUser("alice"));;
+    }
+
+    // AuthDAO Tests
+
+    @Test
+    @DisplayName("Create Auth - Positive")
+    public void createAuthSuccess() throws DataAccessException {
+        AuthData auth = authDAO.createAuth("alice");
+
+        assertNotNull(auth);
+        assertNotNull(auth.authToken());
+        assertEquals("alice", auth.username());
+
+        AuthData expected = authDAO.getAuth(auth.authToken());
+        assertNotNull(expected);
+        assertEquals("alice", expected.username());
+    }
+
+    @Test
+    @DisplayName("Create Auth - Negative")
+    public void createAuthFail() {
+        assertThrows(DataAccessException.class, () -> {
+            authDAO.createAuth(null);
+        });
     }
 }
