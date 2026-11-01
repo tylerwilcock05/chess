@@ -36,7 +36,7 @@ public class UserService {
         }
 
         UserData existingUser = userDAO.getUser(loginRequest.username());
-        if (existingUser == null || !existingUser.password().equals(loginRequest.password())) {
+        if (existingUser == null || !org.mindrot.jbcrypt.BCrypt.checkpw(loginRequest.password(), existingUser.password())) {
             throw new UnauthorizedException("Error: unauthorized");
         }
 
