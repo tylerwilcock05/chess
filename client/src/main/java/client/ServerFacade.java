@@ -26,14 +26,14 @@ public class ServerFacade {
         makeRequest("DELETE", "/session", null, null, authToken);
     }
 
-    public CreateGameResult createGame(String authToken, CreateGameResult request) throws ResponseException {
+    public CreateGameResult createGame(String authToken, CreateGameRequest request) throws ResponseException {
         return makeRequest("POST", "/game", request, CreateGameResult.class, authToken);
     }
 
     public GameData[] listGames(String authToken) throws ResponseException {
         record ListGamesResponse(GameData[] games) {}
         var response = makeRequest("GET", "/game", null, ListGamesResponse.class, authToken);
-        return reponse.games();
+        return response.games();
     }
 
     public void joinGame(String authToken, JoinGameRequest request) throws ResponseException {
