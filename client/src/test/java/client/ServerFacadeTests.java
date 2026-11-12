@@ -2,7 +2,9 @@ package client;
 
 import org.junit.jupiter.api.*;
 import server.Server;
-
+import chess.ChessGame;
+import model.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ServerFacadeTests {
 
@@ -27,10 +29,25 @@ public class ServerFacadeTests {
         facade.clear();
     }
 
+    // Register Tests
 
     @Test
-    public void sampleTest() {
-        Assertions.assertTrue(true);
+    public void registerSuccess() throws ResponseException {
+        var user = new UserData("player1", "password", "jo@gmail.com");
+        var authData = facade.register(user);
+
+        assertNotNull(authData);
+        assertEquals("player1", authData.username());
+        assertNotNull(authData.authToken());
+        assertFalse(authData.authToken().isBlank());
+    }
+
+    @Test
+    public void registerDuplicateUsername() throws ResponseException {
+        var user = new UserData("player1", "password", "jo@gmail.com");
+        facade.register(user);
+
+        assertThrows(ResponseException.class, () -> facade.register(user));
     }
 
 }
