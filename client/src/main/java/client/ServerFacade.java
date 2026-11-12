@@ -26,5 +26,21 @@ public class ServerFacade {
         makeRequest("DELETE", "/session", null, null, authToken);
     }
 
-    
+    public CreateGameResult createGame(String authToken, CreateGameResult request) throws ResponseException {
+        return makeRequest("POST", "/game", request, CreateGameResult.class, authToken);
+    }
+
+    public GameData[] listGames(String authToken) throws ResponseException {
+        record ListGamesResponse(GameData[] games) {}
+        var response = makeRequest("GET", "/game", null, ListGamesResponse.class, authToken);
+        return reponse.games();
+    }
+
+    public void joinGame(String authToken, JoinGameRequest request) throws ResponseException {
+        makeRequest("PUT", "/game", request, null, authToken);
+    }
+
+    public void clear() throws ResponseException {
+        makeRequest("DELETE", "/db", null, null, null);
+    }
 }
