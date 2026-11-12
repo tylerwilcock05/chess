@@ -2,6 +2,13 @@ package client;
 
 import chess.ChessGame;
 import model.*;
+import com.google.gson.Gson;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 public class ServerFacade {
     private final String serverUrl;
@@ -42,5 +49,50 @@ public class ServerFacade {
 
     public void clear() throws ResponseException {
         makeRequest("DELETE", "/db", null, null, null);
+    }
+
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws ResponseException {
+        try {
+            URL url = (new URI(serverUrl + path)).toURL();
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            http.setRequestMethod(method);
+
+            if (authToken != null && !authToken.isEmpty()) {
+                http.addRequestProperty("Authorization", authToken);
+            }
+
+            if (request != null) {
+                http.setDoOutput(true);
+                http.addRequestProperty("Content-Type", "application/json");
+                try (var outputStream = http.getOutputStream()) {
+                    outputStream.write(new Gson().toJson(request).getBytes(StandardCharsets.UTF_8));
+                }
+            }
+
+            http.connect();
+
+            int status = http.getResponseCode();
+            if (status < 200 || status >= 300) {
+                try (var stream = http.getErrorStream()) {
+                    if (stream != null) {
+                        var errorMap = new Gson().fromJson(new InputStreamReader(stream), Map.class);
+                        String message = (errorMap != null && errorMap.get("message") != null) ? errorMap.get("message").toString() : "Error: " + status;
+                        throw new ResponseException(status, message);
+                    }
+                }
+                throw new ResponseException(status, "Error: " + status);
+            }
+
+            if (responseClass != null) {
+                try (var stream = http.getInputStream()) {
+                    return new Gson().fromJson(new InputStreamReader(stream), responseClass);
+                }
+            }
+            return null;
+        } catch (ResponseException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseException(500, e.getMessage());
+        }
     }
 }
