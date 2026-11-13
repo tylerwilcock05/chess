@@ -104,10 +104,12 @@ public class ChessClient {
         var games = server.listGames(authToken);
         var sb = new StringBuilder();
         for (var g : games) {
+            String white = (g.whiteUsername() != null) ? g.whiteUsername() : "<available>";
+            String black = (g.blackUsername() != null) ? g.blackUsername() : "<available>";
             sb.append("ID: ").append(g.gameID())
               .append(" | Name: ").append(g.gameName())
-              .append(" | White: ").append(g.whiteUsername())
-              .append(" | Black: ").append(g.blackUsername())
+              .append(" | White: ").append(white)
+              .append(" | Black: ").append(black)
               .append("\n");
         }
         return sb.toString();
@@ -117,8 +119,23 @@ public class ChessClient {
         if (params.length < 2) {
             return "Usage: play <id> [WHITE|BLACK]\n";
         }
-        int id = Integer.parseInt(params[0]);
-        var color = ChessGame.TeamColor.valueOf(params[1].toUpperCase());
+
+        int id;
+        try {
+            id = Integer.parseInt(params[0]);
+        } catch (NumberFormatException e) {
+            return "Error: Invalid game ID. Please enter a valid number.\n";
+        }
+
+        ChessGame.TeamColor color;
+        if (params[1].equalsIgnoreCase("WHITE")) {
+            color = ChessGame.TeamColor.WHITE;
+        } else if (params[1].equalsIgnoreCase("BLACK")) {
+            color = ChessGame.TeamColor.BLACK;
+        } else {
+            return "Error: Invalid color. Please choose WHITE or BLACK.\n";
+        }
+
         server.joinGame(authToken, new JoinGameRequest(color, id));
 
         var board = new chess.ChessBoard();
@@ -131,8 +148,13 @@ public class ChessClient {
         if (params.length < 1) {
             return "Usage: observe <id>\n";
         }
-        int id = Integer.parseInt(params[0]);
-        server.joinGame(authToken, new JoinGameRequest(null, id));
+
+        int id;
+        try {
+            id = Integer.parseInt(params[0]);
+        } catch (NumberFormatException e) {
+            return "Error: Invalid game ID. Please enter a valid number.\n";
+        }
 
         var board = new chess.ChessBoard();
         board.resetBoard();
