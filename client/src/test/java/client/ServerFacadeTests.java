@@ -117,4 +117,26 @@ public class ServerFacadeTests {
         assertThrows(ResponseException.class, () -> facade.listGames("bad-token"));
     }
 
+    // Join Game Tests
+
+    @Test
+    public void joinGameSuccess() throws ResponseException {
+        var auth = facade.register(new UserData("player1", "password", "jo@gmail.com"));
+        var gameResult = facade.createGame(auth.authToken(), new CreateGameRequest("Game 1"));
+        var joinRequest = new JoinGameRequest(ChessGame.TeamColor.WHITE, gameResult.gameID());
+
+        assertDoesNotThrow(() -> facade.joinGame(auth.authToken(), joinRequest));
+    }
+
+    @Test
+    public void joinGameSpotAlreadyTaken() throws ResponseException {
+        var auth1 = facade.register(new UserData("player1", "password", "jo@gmail.com"));
+        var auth2 = facade.register(new UserData("player2", "password", "jo@gmai.com"));
+        var gameResult = facade.createGame(auth1.authToken(), new CreateGameRequest("Game 1"));
+
+        facade.joinGame(auth1.authToken(), new JoinGameRequest(ChessGame.TeamColor.WHITE, gameResult.gameID()));
+
+        assertThrows(ResponseException.class, () -> facade.joinGame(auth2.authToken(), new JoinGameRequest(ChessGame.TeamColor.WHITE, gameResult.gameID())));
+    }
+
 }
