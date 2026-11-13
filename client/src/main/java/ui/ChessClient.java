@@ -3,6 +3,7 @@ package ui;
 import chess.ChessGame;
 import client.*;
 import model.*;
+
 import java.util.*;
 
 public class ChessClient {
@@ -90,7 +91,7 @@ public class ChessClient {
         this.authToken = auth.authToken();
         return "Logged in as " + auth.username() + "\n";
     }
-    
+
     private String createGame(String[] params) throws ResponseException {
         if (params.length < 1) {
             return "Usage: create <name>\n";
@@ -109,24 +110,28 @@ public class ChessClient {
     }
 
     private String playGame(String[] params) throws ResponseException {
-        if (params.length < 2) return "Usage: play <id> [WHITE|BLACK]\n";
+        if (params.length < 2) {
+            return "Usage: play <id> [WHITE|BLACK]\n";
+        }
         int id = Integer.parseInt(params[0]);
         var color = ChessGame.TeamColor.valueOf(params[1].toUpperCase());
         server.joinGame(authToken, new JoinGameRequest(color, id));
 
         var board = new chess.ChessBoard();
-        board.resetBoard;
+        board.resetBoard();
         BoardRenderer.renderBoard(board, color);
         return "";
     }
 
     private String observeGame(String[] params) throws ResponseException {
-        if (params.length < 1) return "Usage: observe <id>\n";
+        if (params.length < 1) {
+            return "Usage: observe <id>\n";
+        }
         int id = Integer.parseInt(params[0]);
         server.joinGame(authToken, new JoinGameRequest(null, id));
 
         var board = new chess.ChessBoard();
-        board.resetBoard;
+        board.resetBoard();
         BoardRenderer.renderBoard(board, ChessGame.TeamColor.WHITE);
         return "";
     }
