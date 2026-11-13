@@ -104,7 +104,11 @@ public class ChessClient {
         var games = server.listGames(authToken);
         var sb = new StringBuilder();
         for (var g : games) {
-            sb.append("ID: ").append(g.gameID()).append(" | Name: ").append(g.gameName()).append(" | White: ").append(g.whiteUsername()).append(" | Black: ").append(g.blackUsername()).append("\n");
+            sb.append("ID: ").append(g.gameID())
+              .append(" | Name: ").append(g.gameName())
+              .append(" | White: ").append(g.whiteUsername())
+              .append(" | Black: ").append(g.blackUsername())
+              .append("\n");
         }
         return sb.toString();
     }

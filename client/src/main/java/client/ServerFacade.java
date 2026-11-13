@@ -76,7 +76,10 @@ public class ServerFacade {
                 try (var stream = http.getErrorStream()) {
                     if (stream != null) {
                         var errorMap = new Gson().fromJson(new InputStreamReader(stream), Map.class);
-                        String message = (errorMap != null && errorMap.get("message") != null) ? errorMap.get("message").toString() : "Error: " + status;
+                        String message = "Error: " + status;
+                        if (errorMap != null && errorMap.get("message") != null) {
+                            message = errorMap.get("message").toString();
+                        }
                         throw new ResponseException(status, message);
                     }
                 }

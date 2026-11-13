@@ -136,7 +136,9 @@ public class ServerFacadeTests {
 
         facade.joinGame(auth1.authToken(), new JoinGameRequest(ChessGame.TeamColor.WHITE, gameResult.gameID()));
 
-        assertThrows(ResponseException.class, () -> facade.joinGame(auth2.authToken(), new JoinGameRequest(ChessGame.TeamColor.WHITE, gameResult.gameID())));
+        assertThrows(ResponseException.class, () -> 
+            facade.joinGame(auth2.authToken(), new JoinGameRequest(ChessGame.TeamColor.WHITE, gameResult.gameID()))
+        );
     }
 
 }

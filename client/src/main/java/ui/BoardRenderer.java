@@ -44,18 +44,10 @@ public class BoardRenderer {
 
     private static void drawHeaderFooter(PrintStream out, int startCol, int endCol, int step) {
         out.print(BORDER_BG + BORDER_TEXT + "   ");
-        if (step > 0) {
-            for (int col = startCol; col <= endCol; col += step) {
-                char colChar = (char) ('a' + (col - 1));
-                out.print(" " + colChar + " ");
-            }
-        } else {
-            for (int col = startCol; col >= endCol; col += step) {
-                char colChar = (char) ('a' + (col - 1));
-                out.print(" " + colChar + " ");
-            }
+        for (int col = startCol; step > 0 ? col <= endCol : col >= endCol; col += step) {
+            char colChar = (char) ('a' + (col - 1));
+            out.print(" " + colChar + " ");
         }
-
         out.print("   " + RESET_BG_COLOR + RESET_TEXT_COLOR);
         out.println();
     }
@@ -63,24 +55,13 @@ public class BoardRenderer {
     private static void drawRow(PrintStream out, ChessBoard board, int row, int startCol, int endCol, int step) {
         out.print(BORDER_BG + BORDER_TEXT + " " + row + " ");
 
-        if (step > 0) {
-            for (int col = startCol; col <= endCol; col += step) {
-                boolean isLightSquare = (row + col) % 2 != 0;
-                String bgColor = isLightSquare ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
-                out.print(bgColor);
+        for (int col = startCol; step > 0 ? col <= endCol : col >= endCol; col += step) {
+            boolean isLightSquare = (row + col) % 2 != 0;
+            String bgColor = isLightSquare ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
+            out.print(bgColor);
 
-                ChessPiece piece = board.getPiece(new ChessPosition(row, col));
-                out.print(getPieceString(piece));
-            }
-        } else {
-            for (int col = startCol; col >= endCol; col += step) {
-                boolean isLightSquare = (row + col) % 2 != 0;
-                String bgColor = isLightSquare ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
-                out.print(bgColor);
-
-                ChessPiece piece = board.getPiece(new ChessPosition(row, col));
-                out.print(getPieceString(piece));
-            }
+            ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+            out.print(getPieceString(piece));
         }
 
         out.print(BORDER_BG + BORDER_TEXT + " " + row + " " + RESET_BG_COLOR + RESET_TEXT_COLOR);
