@@ -50,4 +50,38 @@ public class ServerFacadeTests {
         assertThrows(ResponseException.class, () -> facade.register(user));
     }
 
+    // Login Tests
+
+    @Test
+    public void LoginSuccess() throws ResponseException {
+        facade.register(new UserData("player1", "password", "jo@gmail.com"));
+        var authData = facade.login(new UserData("player1", "password", null));
+
+        assertNotNull(authData);
+        assertEquals("player1", authData.username());
+        assertNotNull(authData.authToken());
+    }
+
+    @Test
+    public void loginWrongPassword() throws ResponseException {
+        facade.register(new UserData("player1", "password", "jo@gmail.com"));
+
+        assertThrows(ResponseException.class, () -> facade.login(new UserData("player1", "wrong_password", null)));
+    }
+
+    // Logout Tests
+    @Test
+    public void logoutSuccess() throws ResponseException {
+        var auth = facade.register(new UserData("player1", "password", "jo@gmail.com"));
+
+        assertDoesNotThrow(() -> facade.logout(auth.authToken()));
+    }
+
+    @Test
+    public void logoutInvalidToken() {
+        assertThrows(ResponseException.class, () -> facade.logout("invalid-auth-token"));
+    }
+
+    
+
 }
