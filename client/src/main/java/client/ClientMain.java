@@ -2,16 +2,15 @@ package client;
 
 import chess.*;
 import ui.BoardRenderer;
+import ui.Repl;
 
 public class ClientMain {
     public static void main(String[] args) {
-        var board = new ChessBoard();
-        board.resetBoard();
+        var serverUrl = "http://localhost:8080";
+        if (args.length == 1) {
+            serverUrl = args[0];
+        }
 
-        System.out.println("♕ 240 Chess Client: ");
-        System.out.println("White's Perspective:");
-        BoardRenderer.renderBoard(board, ChessGame.TeamColor.WHITE);
-        System.out.println("Black's Perspective:");
-        BoardRenderer.renderBoard(board, ChessGame.TeamColor.BLACK);
+        new Repl(serverUrl).run();
     }
 }
