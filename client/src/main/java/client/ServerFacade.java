@@ -85,7 +85,6 @@ public class ServerFacade {
             throw new ResponseException(500, e.getMessage());
         }
     }
-}
 
     private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
         int status = http.getResponseCode();
@@ -103,3 +102,4 @@ public class ServerFacade {
         }
         throw new ResponseException(status, message);
     }
+}
