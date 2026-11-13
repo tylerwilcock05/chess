@@ -3,6 +3,7 @@ package client;
 import chess.ChessGame;
 import model.*;
 import com.google.gson.Gson;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -70,21 +71,7 @@ public class ServerFacade {
             }
 
             http.connect();
-
-            int status = http.getResponseCode();
-            if (status < 200 || status >= 300) {
-                try (var stream = http.getErrorStream()) {
-                    if (stream != null) {
-                        var errorMap = new Gson().fromJson(new InputStreamReader(stream), Map.class);
-                        String message = "Error: " + status;
-                        if (errorMap != null && errorMap.get("message") != null) {
-                            message = errorMap.get("message").toString();
-                        }
-                        throw new ResponseException(status, message);
-                    }
-                }
-                throw new ResponseException(status, "Error: " + status);
-            }
+            throwIfNotSuccessful(http);
 
             if (responseClass != null) {
                 try (var stream = http.getInputStream()) {
@@ -99,3 +86,20 @@ public class ServerFacade {
         }
     }
 }
+
+    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
+        int status = http.getResponseCode();
+        if (status >= 200 && status < 300) {
+            return;
+        }
+
+        String message = "Error: " + status;
+        try (var stream = http.getErrorStream()) {
+            if (stream != null) {
+                var errorMap = new Gson().fromJson(new InputStreamReader(stream), Map.class);
+                var serverMsg = (errorMap != null) ? errorMap.get("message") : null;
+                message = (serverMsg != null) ? serverMsg.toString() : message;
+            }
+        }
+        throw new ResponseException(status, message);
+    }
