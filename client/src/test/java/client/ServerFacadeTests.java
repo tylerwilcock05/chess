@@ -53,7 +53,7 @@ public class ServerFacadeTests {
     // Login Tests
 
     @Test
-    public void LoginSuccess() throws ResponseException {
+    public void loginSuccess() throws ResponseException {
         facade.register(new UserData("player1", "password", "jo@gmail.com"));
         var authData = facade.login(new UserData("player1", "password", null));
 
@@ -97,6 +97,24 @@ public class ServerFacadeTests {
     @Test
     public void createGameUnauthorized() {
         assertThrows(ResponseException.class, () -> facade.createGame("bad-token", new CreateGameRequest("My Chess Game")));
+    }
+
+    // List Games Tests
+
+    @Test
+    public void listGamesSuccess() throws ResponseException {
+        var auth = facade.register(new UserData("player1", "password", "jo@gmail.com"));
+        facade.createGame(auth.authToken(), new CreateGameRequest("Game 1"));
+        facade.createGame(auth.authToken(), new CreateGameRequest("Game 2"));
+        var games = facade.listGames(auth.authToken());
+
+        assertNotNull(games);
+        assertEquals(2, games.length);
+    }
+
+    @Test
+    public void listGamesUnauthorized() {
+        assertThrows(ResponseException.class, () -> facade.listGames("bad-token"));
     }
 
 }
