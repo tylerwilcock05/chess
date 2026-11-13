@@ -70,6 +70,7 @@ public class ServerFacadeTests {
     }
 
     // Logout Tests
+
     @Test
     public void logoutSuccess() throws ResponseException {
         var auth = facade.register(new UserData("player1", "password", "jo@gmail.com"));
@@ -82,6 +83,20 @@ public class ServerFacadeTests {
         assertThrows(ResponseException.class, () -> facade.logout("invalid-auth-token"));
     }
 
-    
+    // Create Game Tests
+
+    @Test
+    public void createGameSuccess() throws ResponseException {
+        var auth = facade.register(new UserData("player1", "password", "jo@gmail.com"));
+        var result = facade.createGame(auth.authToken(), new CreateGameRequest("My Chess Game"));
+
+        assertNotNull(result);
+        assertTrue(result.gameID() > 0);
+    }
+
+    @Test
+    public void createGameUnauthorized() {
+        assertThrows(ResponseException.class, () -> facade.createGame("bad-token", new CreateGameRequest("My Chess Game")));
+    }
 
 }
